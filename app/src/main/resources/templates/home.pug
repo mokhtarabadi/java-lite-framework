@@ -1,0 +1,9 @@
+extends layout
+
+block append script
+    :closure
+        $(document).ready(function () {
+            console.log("Hello world!");
+            // redirect user to /dashboard
+            window.location.href = "/dashboard";
+        });

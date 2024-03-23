@@ -1,0 +1,10 @@
+extends layout
+
+block append style
+    include:css css/error.css
+
+block content
+    .ui.container
+        h1 #{ errorTitle }
+        p #{ errorDescription }
+        a.ui.button(href="/") #{ go.home }

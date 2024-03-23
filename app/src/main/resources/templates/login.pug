@@ -1,0 +1,75 @@
+extends layout
+include mixins
+
+block content
+    .ui.middle.aligned.centered.grid
+        .eight.wide.column
+            .ui.segment
+                .content
+                    // title
+                    h2.ui.header #{ bundles[lang]['login'] }
+                    // form
+                    form.ui.form
+                        // show errors
+                        +formErrors(bundles[lang]['login.error.title'])
+
+                        // show signup notice
+                        if signup
+                            .ui.green.message
+                                i.close.icon
+                                .header #{ bundles[lang]['signup.success.title'] }
+                                p #{ bundles[lang]['signup.success.message'] }
+
+                        // display logout notice
+                        if logout
+                            .ui.blue.message
+                                i.close.icon
+                                p #{ bundles[lang]['logout.notice'] }
+
+                        // display needed re-login notice
+                        if relogin
+                            .ui.red.message
+                                i.close.icon
+                                p #{ bundles[lang]['relogin.notice'] }
+
+                        // username
+                        .field
+                            label(for="username") #{ bundles[lang]['username'] }
+                            input#username(
+                                type="text",
+                                name="username",
+                                value=username ? username : "",
+                                required
+                            )
+
+                        // password
+                        .field
+                            label(for="password") #{ bundles[lang]['password'] }
+                            input#password(
+                                type="password",
+                                name="password",
+                                required
+                            )
+
+                        // remember me
+                        .field
+                            .ui.checkbox
+                                input#rememberMe(
+                                    type="checkbox",
+                                    name="rememberMe"
+                                )
+                                label(for="rememberMe") #{ bundles[lang]['login.rememberMe'] }
+
+                        // submit
+                        +formButton(bundles[lang]['login'])
+                        br
+                        p #{ bundles[lang]['login.newUser'] }&nbsp;
+                            a(href="/signup") #{ bundles[lang]['signup'] }
+
+    #success.ui.green.toast
+        .content
+            .ui.header #{ bundles[lang]['login.success.title'] }
+            p #{ bundles[lang]['login.success.message'] }
+
+block append script
+    include:closure js/login.js

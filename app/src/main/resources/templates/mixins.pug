@@ -1,0 +1,9 @@
+mixin formErrors(header)
+    #errors.ui.red.message(style="display: none")
+        .header #{ header }
+        ul.list
+
+mixin formButton(text)
+    button#submit.ui.primary.button(type="submit")
+        i.loading.spinner.icon(style="display: none")
+        span #{ text }

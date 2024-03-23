@@ -1,0 +1,43 @@
+extends layout
+include mixins
+
+block append style
+    link(rel="stylesheet", type="text/css", href="/dist/datatables.min.css")
+    include:css css/dashboard.css
+
+block content
+    // sidebar
+    include sidebar
+
+    // pusher
+    .pusher
+        include navbar
+
+        .main-content
+            .ui.grid.stackable.padded
+                // options
+                .two.wide.column
+                    // buttons
+                    .ui.segment
+                        h4.ui.center.aligned.header #{ bundles[lang]['actions'] }
+                        #buttons.ui.center.aligned.buttons.vertical
+
+                // table
+                .fourteen.wide.column
+                    table#systemLogs.ui.celled.table
+                        thead
+                            tr
+                                th #{ bundles[lang]['type'] }
+                                th #{ bundles[lang]['createdAt'] }
+                                th #{ bundles[lang]['result'] }
+
+                        tfoot
+                            tr
+                                th #{ bundles[lang]['type'] }
+                                th #{ bundles[lang]['createdAt'] }
+                                th #{ bundles[lang]['result'] }
+
+block append script
+    script(src="/dist/datatables.min.js")
+    include:closure js/dashboard.js
+    include:closure js/admin_system_logs.js

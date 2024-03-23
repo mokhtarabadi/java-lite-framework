@@ -1,0 +1,141 @@
+extends layout
+
+block append style
+    include:css css/dashboard.css
+
+block content
+    include sidebar
+
+    .pusher
+        include navbar
+
+        .main-content
+            .ui.grid.stackable.padded
+                .four.wide.computer.eight.wide.tablet.sixteen.wide.mobile.column
+                    .ui.fluid.card
+                        .content
+                            .ui.right.floated.header.red
+                                i.icon.shopping.cart
+                            .header
+                                .ui.red.header
+                                    | 3958
+                            .meta
+                                | orders
+                            .description
+                                | Elliot requested permission to view your contact details
+                        .extra.content
+                            .ui.two.buttons
+                                .ui.red.button More Info
+                .four.wide.computer.eight.wide.tablet.sixteen.wide.mobile.column
+                    .ui.fluid.card
+                        .content
+                            .ui.right.floated.header.green
+                                i.icon.clock
+                            .header
+                                .ui.header.green 57.6%
+                            .meta
+                                | Time
+                            .description
+                                | Elliot requested permission to view your contact details
+                        .extra.content
+                            .ui.two.buttons
+                                .ui.green.button More Info
+                .four.wide.computer.eight.wide.tablet.sixteen.wide.mobile.column
+                    .ui.fluid.card
+                        .content
+                            .ui.right.floated.header.teal
+                                i.icon.briefcase
+                            .header
+                                .ui.teal.header 3112
+                            .meta
+                                | Saves
+                            .description
+                                | Elliot requested permission to view your contact details
+                        .extra.content
+                            .ui.two.buttons
+                                .ui.teal.button More Info
+                .four.wide.computer.eight.wide.tablet.sixteen.wide.mobile.column
+                    .ui.fluid.card
+                        .content
+                            .ui.right.floated.header.purple
+                                i.icon.trophy
+                            .header
+                                .ui.purple.header 9805
+                            .meta
+                                | Views
+                            .description
+                                | Elliot requested permission to view your contact details
+                        .extra.content
+                            .ui.two.buttons
+                                .ui.purple.button More Info
+            .ui.grid.stackable.padded
+                .column
+                    table.ui.celled.striped.table
+                        thead
+                            tr
+                                th(colspan="3")
+                                    | Git Repository
+                        tbody
+                            tr
+                                td.collapsing
+                                    i.folder.icon
+                                    |
+                                    | node_modules
+                                td Initial commit
+                                td.right.aligned.collapsing 10 hours ago
+                            tr
+                                td
+                                    i.folder.icon
+                                    |
+                                    | test
+                                td Initial commit
+                                td.right.aligned 10 hours ago
+                            tr
+                                td
+                                    i.folder.icon
+                                    |
+                                    | build
+                                td Initial commit
+                                td.right.aligned 10 hours ago
+                            tr
+                                td
+                                    i.file.outline.icon
+                                    |
+                                    | package.json
+                                td Initial commit
+                                td.right.aligned 10 hours ago
+                            tr
+                                td
+                                    i.file.outline.icon
+                                    |
+                                    | Gruntfile.js
+                                td Initial commit
+                                td.right.aligned 10 hours ago
+            .ui.grid.stackable.padded
+                .four.wide.computer.eight.wide.tablet.sixteen.wide.mobile.center.aligned.column
+                    .ui.teal.statistic
+                        .value
+                            | 5,550
+                        .label
+                            | Downloads
+                .four.wide.computer.eight.wide.tablet.sixteen.wide.mobile.center.aligned.column
+                    .ui.purple.statistic
+                        .value
+                            | 50+
+                        .label
+                            | Developers
+                .four.wide.computer.eight.wide.tablet.sixteen.wide.mobile.center.aligned.column
+                    .ui.green.statistic
+                        .value
+                            | 800+
+                        .label
+                            | Commits
+                .four.wide.computer.eight.wide.tablet.sixteen.wide.mobile.center.aligned.column
+                    .ui.purple.statistic
+                        .value
+                            | 1000+
+                        .label
+                            | Cups of Coffee
+
+block append script
+    include:closure js/dashboard.js

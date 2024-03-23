@@ -1,0 +1,118 @@
+plugins {
+    id 'java'
+    id 'com.diffplug.spotless'
+    id 'com.github.johnrengelman.shadow'
+}
+
+group = 'org.example'
+version = '1.1-SNAPSHOT'
+
+shadowJar {
+    archiveBaseName.set('app')
+    archiveClassifier.set('')
+    archiveVersion.set('')
+    mergeServiceFiles()
+    manifest {
+        attributes 'Main-Class': 'org.example.App'
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+dependencies {
+    // other
+    implementation 'com.intellij:annotations:12.0'
+
+    // spark java
+    implementation 'com.sparkjava:spark-core:2.9.4'
+
+    // template engine
+    implementation 'de.neuland-bfi:pug4j:2.0.6'
+
+    // gson
+    implementation 'com.google.code.gson:gson:2.9.0'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // mapstruct
+    implementation 'org.mapstruct:mapstruct:1.5.3.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+    // dagger 2
+    implementation 'com.google.dagger:dagger:2.44.2'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.44.2'
+
+    // tools
+    implementation 'org.mindrot:jbcrypt:0.4'
+    implementation 'com.auth0:java-jwt:3.18.2'
+    implementation 'com.typesafe:config:1.4.2'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'com.google.javascript:closure-compiler:v20230228'
+
+    // database
+    implementation 'com.j256.ormlite:ormlite-core:6.1'
+    implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
+    implementation 'org.flywaydb:flyway-core:7.15.0'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.3'
+
+    // caching
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
+
+    // validation
+    implementation 'org.apache.bval:bval-jsr:2.0.6'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+
+    // logging
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'ch.qos.logback:logback-classic:1.4.12'
+
+    // test lombok
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // test
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+spotless {
+    java {
+        importOrder()
+        removeUnusedImports()
+        cleanthat()
+        //googleJavaFormat()
+        //eclipse()
+        palantirJavaFormat()
+        formatAnnotations()
+        licenseHeader '/* (C) $YEAR */' // or licenseHeaderFile
+    }
+
+    sql {
+        target 'src/*/resources/db/migration/*.sql' // have to set manually
+        dbeaver()
+    }
+
+    format 'pug', {
+        target 'src/*/resources/templates/**/*.pug'
+
+        //prettier(['prettier': '2.8.8', '@prettier/plugin-pug': '0.19.6']).config(['parser': 'pug', 'tabWidth': 4])
+        prettier(['prettier': '3.1.1', '@prettier/plugin-pug': '3.0.0']).config(['parser': 'pug', 'tabWidth': 4, 'plugins': ['@prettier/plugin-pug']]) // Prettier v3 requires additional 'plugins' config
+    }
+
+    javascript {
+        target 'src/*/resources/templates/**/*.js' // you have to set the target manually
+
+        prettier() // has its own section below
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

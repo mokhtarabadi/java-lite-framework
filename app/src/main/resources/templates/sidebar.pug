@@ -1,0 +1,27 @@
+// sidebar
+#sidebar.ui.sidebar.inverted.vertical.menu.sidebar-menu
+    // dashboard sub menu
+    .item
+        i.dashboard.icon
+        | #{ bundles[lang]['sidebar.dashboard'] }
+
+    // admin dashboard sub menu
+    if user.isAdmin()
+        .item
+            i.user.cirlce.icon
+            | #{ bundles[lang]['sidebar.admin'] }
+            .menu
+                // manage users item
+                a.item(href="/admin/users")
+                    i.users.icon
+                    | #{ bundles[lang]['sidebar.admin.users'] }
+                // manage logs sub menu
+                .item
+                    i.log.icon
+                    | #{ bundles[lang]['sidebar.admin.logs'] }
+                    .menu
+                        // system logs item
+                        a.item(href="/admin/logs/system")
+                            i.info.icon
+                            | #{ bundles[lang]['sidebar.admin.logs.system'] }
+// sidebar

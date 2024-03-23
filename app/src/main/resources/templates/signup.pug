@@ -1,0 +1,70 @@
+extends layout
+include mixins
+
+block content
+    .ui.middle.aligned.centered.grid
+        .eight.wide.column
+            .ui.segment
+                .content
+                    // header
+                    h2.ui.header #{ bundles[lang]['signup'] }
+                    // form
+                    form.ui.form
+                        // show errors
+                        +formErrors(bundles[lang]['signup.error.title'])
+
+                        // username
+                        .field
+                            label(for="username") #{ bundles[lang]['username'] }
+                            input#username(
+                                type="text",
+                                name="username",
+                                required
+                            )
+
+                        // email
+                        .field
+                            label(for="email") #{ bundles[lang]['signup.email'] }
+                            input#email(type="email", name="email")
+
+                        // first name
+                        .field
+                            label(for="firstName") #{ bundles[lang]['firstName'] }
+                            input#firstName(
+                                type="text",
+                                name="firstName",
+                                required
+                            )
+
+                        // last name
+                        .field
+                            label(for="lastName") #{ bundles[lang]['lastName'] }
+                            input#lastName(type="text", name="lastName")
+
+                        // password
+                        .field
+                            label(for="password") #{ bundles[lang]['password'] }
+                            input#password(
+                                type="password",
+                                name="password",
+                                required
+                            )
+
+                        // confirm password
+                        .field
+                            label(for="confirmPassword") #{ bundles[lang]['signup.confirmPassword'] }
+                            input#confirmPassword(
+                                type="password",
+                                name="confirmPassword",
+                                required
+                            )
+
+                        // submit
+                        +formButton(bundles[lang]['signup'])
+
+                        br
+                        p #{ bundles[lang]['signup.existingUser'] }&nbsp;
+                            a(href="/login") #{ bundles[lang]['login'] }
+
+block append script
+    include:closure js/signup.js

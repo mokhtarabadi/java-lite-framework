@@ -1,0 +1,22 @@
+doctype html
+html(lang=lang, dir="ltr")
+    head
+        title #{ title }
+        meta(charset="utf-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1")
+        block style
+            link(
+                rel="stylesheet",
+                type="text/css",
+                href="/dist/semantic.min.css"
+            )
+    body
+        block content
+
+    block script
+        script(src="/dist/jquery-3.7.1.min.js")
+        script(src="/dist/semantic.min.js")
+        script.
+            const bundles = !{gson.toJson(bundles)};
+        include:closure js/bundle.js
+        include:closure js/layout.js

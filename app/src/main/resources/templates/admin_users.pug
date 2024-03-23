@@ -1,0 +1,121 @@
+extends layout
+include mixins
+
+block append style
+    link(rel="stylesheet", type="text/css", href="/dist/datatables.min.css")
+    include:css css/dashboard.css
+
+block content
+    include sidebar
+
+    .ui.left.flyout(style="overflow-y: auto")
+        i.close.icon
+        .ui.header #{ bundles[lang]['admin.users.edit'] }
+        .content
+            form.ui.form
+                // show validating errors
+                +formErrors(bundles[lang]['login.error.title'])
+
+                // username
+                .field
+                    label(for="username") #{ bundles[lang]['username'] }
+                    input#username(type="text", name="username", required)
+
+                // email
+                .field
+                    label(for="email") #{ bundles[lang]['email'] }
+                    input#email(type="email", name="email")
+
+                // first name
+                .field
+                    label(for="firstName") #{ bundles[lang]['firstName'] }
+                    input#firstName(name="firstName", type="text", required)
+
+                // last name
+                .field
+                    label(for="lastName") #{ bundles[lang]['lastName'] }
+                    input#lastName(type="text", name="lastName")
+
+                // new password
+                .field
+                    label(for="newPassword") #{ bundles[lang]['admin.users.newPassword'] }
+                    input#newPassword(
+                        type="password",
+                        name="newPassword",
+                        required=false
+                    )
+
+                // confirm new password
+                .field
+                    label(for="confirmNewPassword") #{ bundles[lang]['admin.users.confirmNewPassword'] }
+                    input#confirmNewPassword(
+                        type="password",
+                        name="confirmNewPassword",
+                        required=false
+                    )
+
+                // clazz
+                .field
+                    label(for="clazz") #{ bundles[lang]['clazz'] }
+                    input#clazz(type="number", name="clazz", required)
+
+                // status
+                .field
+                    .ui.toggle.checkbox
+                        input#status(type="checkbox", name="status")
+                        label(for="status") #{ bundles[lang]['status'] }
+
+                // roles
+                .field
+                    label(for="roles") #{ bundles[lang]['admin.users.roles'] }
+                    select#roles.ui.fluid.dropdown(multiple="", name="roles")
+
+        .actions
+            .ui.red.button
+                i.remove.icon
+                | #{ bundles[lang]['cancel'] }
+
+            .ui.green.button
+                i.checkmark.icon
+                | #{ bundles[lang]['edit'] }
+
+    // pusher
+    .pusher
+        include navbar
+
+        .main-content
+            .ui.grid.stackable.padded
+                // buttons
+                .two.wide.column
+                    .ui.segment
+                        h4.ui.center.aligned.header #{ bundles[lang]['actions'] }
+                        #buttons.ui.center.aligned.buttons.vertical
+                // table
+                .fourteen.wide.column
+                    table#users.ui.celled.table
+                        thead
+                            tr
+                                th #{ bundles[lang]['username'] }
+                                th #{ bundles[lang]['email'] }
+                                th #{ bundles[lang]['firstName'] }
+                                th #{ bundles[lang]['lastName'] }
+                                th #{ bundles[lang]['updatedAt'] }
+                                th #{ bundles[lang]['clazz'] }
+                                th #{ bundles[lang]['status'] }
+                                th #{ bundles[lang]['admin.users.roles'] }
+
+                        tfoot
+                            tr
+                                th #{ bundles[lang]['username'] }
+                                th #{ bundles[lang]['email'] }
+                                th #{ bundles[lang]['firstName'] }
+                                th #{ bundles[lang]['lastName'] }
+                                th #{ bundles[lang]['updatedAt'] }
+                                th #{ bundles[lang]['clazz'] }
+                                th #{ bundles[lang]['status'] }
+                                th #{ bundles[lang]['admin.users.roles'] }
+
+block append script
+    script(src="/dist/datatables.min.js")
+    include:closure js/dashboard.js
+    include:closure js/admin_users.js

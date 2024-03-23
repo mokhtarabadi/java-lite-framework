@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property resource="application.properties"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%highlight(%-5level) %magenta([%d{HH:mm:ss.SSS}]) %green(%logger{15}) - %msg%n%throwable</pattern>
+        </encoder>
+    </appender>
+
+    <!-- New file appender without colors -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${app.log-file}</file>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.example" level="${app.log-level}" />
+    <logger name="org.drinkless.tdlib" level="${app.log-level}" />
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" /> <!-- Add this line to include the file appender -->
+    </root>
+</configuration>

@@ -1,0 +1,33 @@
+// top nav
+nav.ui.top.fixed.inverted.menu
+    .left.menu
+        a.sidebar-menu-toggler.item(href="#", data-target="#sidebar")
+            i.sidebar.icon
+        a.header.item(href="#")
+            | Semantic UI
+    .right.menu
+        a.item(href="#")
+            i.bell.icon
+        // language selection
+        .ui.dropdown.item
+            i.globe.icon
+            .menu
+                a.item(href="#", onclick="setLang('en-US')") English
+                a.item(href="#", onclick="setLang('fa-IR')") فارسی
+                a.item(href="#", onclick="setLang('zh-CN')") 简体中文
+        .ui.dropdown.item
+            i.user.cirlce.icon
+            .menu
+                a.item(href="#")
+                    i.info.circle.icon
+                    |
+                    | #{ bundles[lang]['profile'] }
+                a#settings.item(href="#")
+                    i.wrench.icon
+                    |
+                    | #{ bundles[lang]['settings'] }
+                a#logout.item(href="#")
+                    i.sign.out.icon
+                    |
+                    | #{ bundles[lang]['logout'] }
+// top nav
