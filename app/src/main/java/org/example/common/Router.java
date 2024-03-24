@@ -1,4 +1,10 @@
-/* (C) 2023 */
+/*
+ * Apache License 2.0
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Copyright [2023] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]
+ */
 package org.example.common;
 
 import com.google.gson.Gson;
@@ -19,6 +25,7 @@ import org.example.annoation.authorization.AnonymousAllowed;
 import org.example.annoation.authorization.DenyAll;
 import org.example.annoation.authorization.PermitAll;
 import org.example.annoation.authorization.RolesAllowed;
+import org.example.config.AppConfig;
 import org.example.controller.*;
 import org.example.dto.ResultDTO;
 import org.example.entity.User;
@@ -45,6 +52,8 @@ public class Router {
     @NonNull private Localization localization;
 
     @NonNull private Gson gson;
+
+    @NonNull private AppConfig appConfig;
 
     // needed services
     @NonNull private UserService userService;
@@ -169,7 +178,11 @@ public class Router {
                         }
 
                         // put lang
-                        model.put("lang", request.cookie("lang"));
+                        String lang = request.cookie("lang");
+                        if (lang == null) {
+                            lang = appConfig.getDefaultLocale();
+                        }
+                        model.put("lang", lang);
 
                         return modelAndView;
                     }

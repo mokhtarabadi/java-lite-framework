@@ -1,14 +1,17 @@
-/* (C) 2023 */
+/*
+ * Apache License 2.0
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Copyright [2023] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]
+ */
 package org.example.service;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.support.ConnectionSource;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.example.common.AuthorizationRole;
+import org.example.common.LoadingCache;
 import org.example.contract.AuthContract;
 import org.example.contract.UserContract;
 import org.example.dto.*;
@@ -31,9 +35,6 @@ import org.example.repository.UserRoleRepository;
 import org.example.state.LoginState;
 import org.example.state.UserState;
 import org.mindrot.jbcrypt.BCrypt;
-import org.redisson.api.RMapCache;
-import org.redisson.api.RedissonClient;
-
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
@@ -41,8 +42,6 @@ import org.redisson.api.RedissonClient;
 public class UserService implements UserContract, AuthContract {
 
     @NonNull private ConnectionSource connectionSource;
-
-    @NonNull private RedissonClient redissonClient;
 
     @NonNull private UserRepository userRepository;
 
@@ -52,7 +51,21 @@ public class UserService implements UserContract, AuthContract {
 
     @NonNull private LogService logService;
 
-    private RMapCache<UUID, User> userCache;
+    @NonNull private LoadingCache<UUID, User> userCache;
+
+    private final LoadingCache.CacheLoader<UUID, User> userCacheLoader = new LoadingCache.CacheLoader<>() {
+        @Override
+        public User load(UUID key) throws SQLException {
+            User user = userRepository.read(key);
+            if (user == null) {
+                log.debug("User not found: {}", key);
+                return null;
+            }
+
+            log.debug("get user from db: {}", user);
+            return user;
+        }
+    };
 
     @Override
     public LoginState validateUserCredentials(LoginDTO dto) throws SQLException {
@@ -282,25 +295,6 @@ public class UserService implements UserContract, AuthContract {
 
     @Override
     public User getUser(UUID uuid) throws SQLException {
-        if (userCache == null) {
-            userCache = redissonClient.getMapCache("users"); // <UUID, User>
-            userCache.setMaxSize(100);
-            userCache.setExpire(10, TimeUnit.MINUTES);
-        }
-
-        User cachedUser = userCache.get(uuid);
-        if (cachedUser == null) {
-            User user = userRepository.read(uuid);
-            if (user == null) {
-                log.debug("User not found: {}", uuid);
-                return null;
-            }
-
-            log.debug("get user from db: {}", user);
-            return userCache.put(uuid, user, 10, TimeUnit.MINUTES);
-        }
-
-        log.debug("get user from cache: {}", cachedUser);
-        return cachedUser;
+        return userCache.get(uuid, userCacheLoader);
     }
 }

@@ -91,7 +91,13 @@ spotless {
         //eclipse()
         palantirJavaFormat()
         formatAnnotations()
-        licenseHeader '/* (C) $YEAR */' // or licenseHeaderFile
+        licenseHeader '/*\n' +
+                ' * Apache License 2.0\n' +
+                ' * \n' +
+                ' * SPDX-License-Identifier: Apache-2.0\n' +
+                ' * \n' +
+                ' * Copyright [$YEAR] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]\n' +
+                ' */\n' // or licenseHeaderFile
     }
 
     sql {

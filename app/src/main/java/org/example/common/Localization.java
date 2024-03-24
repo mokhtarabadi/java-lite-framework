@@ -1,4 +1,10 @@
-/* (C) 2024 */
+/*
+ * Apache License 2.0
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Copyright [2024] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]
+ */
 package org.example.common;
 
 import java.util.*;
@@ -51,7 +57,7 @@ public class Localization {
     public String getString(@Nullable String locale, String key) {
         try {
             ResourceBundle bundle = getBundle(locale);
-            // log.trace("locale: {}, key: {}", bundle.getLocale(), key);
+            log.trace("locale: {}, key: {}", bundle.getLocale(), key);
             return bundle.getString(key);
         } catch (MissingResourceException e) {
             return key;

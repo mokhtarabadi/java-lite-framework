@@ -11,10 +11,9 @@ nav.ui.top.fixed.inverted.menu
         // language selection
         .ui.dropdown.item
             i.globe.icon
-            .menu
-                a.item(href="#", onclick="setLang('en-US')") English
-                a.item(href="#", onclick="setLang('fa-IR')") فارسی
-                a.item(href="#", onclick="setLang('zh-CN')") 简体中文
+            #languages.menu
+                each lang in supportedLanguages
+                    button.item(data-lang=lang.getKey()) #{ lang.getValue() }
         .ui.dropdown.item
             i.user.cirlce.icon
             .menu

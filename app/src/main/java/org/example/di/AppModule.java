@@ -1,10 +1,15 @@
-/* (C) 2023 */
+/*
+ * Apache License 2.0
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Copyright [2023] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]
+ */
 package org.example.di;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.j256.ormlite.jdbc.DataSourceConnectionSource;
-import com.j256.ormlite.jdbc.db.MariaDbDatabaseType;
 import com.j256.ormlite.support.ConnectionSource;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -15,9 +20,11 @@ import de.neuland.pug4j.Pug4J;
 import java.io.File;
 import java.util.*;
 import javax.inject.Singleton;
+import javax.sql.DataSource;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.example.common.ClosureFilter;
 import org.example.common.CustomValidator;
 import org.example.common.Localization;
@@ -67,38 +74,33 @@ public class AppModule {
 
     @Provides
     @Singleton
-    public HikariDataSource provideHikariDataSource(@NotNull AppConfig appConfig) {
+    public DataSource provideDataSource(@NotNull AppConfig appConfig) {
         HikariDataSource ds = new HikariDataSource();
         ds.setJdbcUrl(appConfig.getDatabaseUrl());
         ds.setUsername(appConfig.getDatabaseUsername());
         ds.setPassword(appConfig.getDatabasePassword());
-        ds.setDriverClassName("org.mariadb.jdbc.Driver");
         ds.setMaximumPoolSize(100);
         ds.setConnectionTestQuery("SELECT 1 FROM DUAL");
-        ds.setMaxLifetime(60000L);
-        ds.setMinimumIdle(5);
-        ds.setConnectionTimeout(30000L);
         return ds;
     }
 
     @SneakyThrows
     @Provides
     @Singleton
-    public ConnectionSource provideConnectionSource(@NotNull HikariDataSource hikariDataSource) {
-        MariaDbDatabaseType mariaDbDatabaseType = new MariaDbDatabaseType();
-        return new DataSourceConnectionSource(hikariDataSource, mariaDbDatabaseType);
+    public ConnectionSource provideConnectionSource(@NotNull DataSource dataSource, @NonNull AppConfig appConfig) {
+        return new DataSourceConnectionSource(dataSource, appConfig.getDatabaseUrl());
     }
 
     @Provides
     @Singleton
     public RedissonClient provideRedissonClient(@NotNull AppConfig appConfig) {
         org.redisson.config.Config config = new org.redisson.config.Config();
+        // config.setCodec(new org.redisson.codec.JsonJacksonCodec());
         SingleServerConfig singleServerConfig = config.useSingleServer().setAddress(appConfig.getRedisUrl());
         if (StringUtils.isNotBlank(appConfig.getRedisPassword())) {
             singleServerConfig.setPassword(appConfig.getRedisPassword());
         }
-        RedissonClient redissonClient = Redisson.create(config);
-        return redissonClient;
+        return Redisson.create(config);
     }
 
     @Provides
@@ -124,6 +126,7 @@ public class AppModule {
         templateEngine.getConfiguration().setMode(Pug4J.Mode.HTML);
         templateEngine.getConfiguration().setCaching(true);
 
+        List<Pair<String, String>> supportedLanguages = new ArrayList<>();
         Map<String, Map<String, Object>> bundles = new HashMap<>();
         for (String supportedLocale : localization.getSupportedLocales()) {
             Map<String, Object> bundle = new HashMap<>();
@@ -134,11 +137,14 @@ public class AppModule {
                             key, localization.getBundle(supportedLocale).getObject(key)));
 
             bundles.put(supportedLocale, bundle);
+
+            supportedLanguages.add(Pair.of(supportedLocale, localization.getString(supportedLocale, "language.name")));
         }
 
         Map<String, Object> sharedVariables = new HashMap<>();
         sharedVariables.put("bundles", bundles);
         sharedVariables.put("gson", gson);
+        sharedVariables.put("supportedLanguages", supportedLanguages);
 
         templateEngine.getConfiguration().setSharedVariables(sharedVariables);
 

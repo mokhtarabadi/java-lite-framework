@@ -1,3 +1,3 @@
-rootProject.name = 'lite-java-framework'
+rootProject.name = 'java-lite-framework'
 include 'app'
 

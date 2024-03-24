@@ -1,7 +1,14 @@
-/* (C) 2023 */
+/*
+ * Apache License 2.0
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Copyright [2023] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]
+ */
 package org.example.controller;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +51,11 @@ public class UserController extends AbstractController {
         response.removeCookie("/", "refreshToken");
         request.session().removeAttribute("accessToken");
         return success();
+    }
+
+    @APIEndpoint(method = HTTPMethod.GET, path = "/api/v1/user/supported-languages")
+    public ResultDTO<List<String>> getSupportedLanguages(Request request, Response response) {
+        return success(getLocalization().getSupportedLocales());
     }
 
     @APIEndpoint(method = HTTPMethod.PUT, path = "/api/v1/user/change-language")

@@ -1,11 +1,17 @@
-/* (C) 2023 */
+/*
+ * Apache License 2.0
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Copyright [2023] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]
+ */
 package org.example.common;
 
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import com.zaxxer.hikari.HikariDataSource;
 import java.sql.SQLException;
 import javax.inject.Inject;
+import javax.sql.DataSource;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.entity.*;
@@ -16,7 +22,7 @@ public class DatabaseMigration {
 
     @NonNull private ConnectionSource connectionSource;
 
-    @NonNull private HikariDataSource hikariDataSource;
+    @NonNull private DataSource dataSource;
 
     public void migrate() throws SQLException {
         // create tables
@@ -31,7 +37,7 @@ public class DatabaseMigration {
                 .validateOnMigrate(true)
                 .baselineOnMigrate(true)
                 .baselineVersion("0")
-                .dataSource(hikariDataSource)
+                .dataSource(dataSource)
                 .table("migrations")
                 .locations("classpath:db/migration")
                 .load();
@@ -39,8 +45,8 @@ public class DatabaseMigration {
         flyway.migrate();
     }
 
-    public void release() {
+    public void release() throws SQLException {
         connectionSource.closeQuietly();
-        hikariDataSource.close();
+        dataSource.getConnection().close();
     }
 }
