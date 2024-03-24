@@ -9,5 +9,7 @@ package org.example.common;
 
 public enum AuthorizationRole {
     ROLE_ADMIN,
-    ROLE_USER
+    ROLE_USER,
+    ROLE_CUSTOMER,
+    ROLE_PROVIDER
 }
