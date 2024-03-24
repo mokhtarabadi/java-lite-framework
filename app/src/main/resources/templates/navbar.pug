@@ -3,8 +3,7 @@ nav.ui.top.fixed.inverted.menu
     .left.menu
         a.sidebar-menu-toggler.item(href="#", data-target="#sidebar")
             i.sidebar.icon
-        a.header.item(href="#")
-            | Semantic UI
+        a.header.item(href="#") #{ bundles[lang]['app.name'] }
     .right.menu
         a.item(href="#")
             i.bell.icon
@@ -17,15 +16,15 @@ nav.ui.top.fixed.inverted.menu
         .ui.dropdown.item
             i.user.cirlce.icon
             .menu
-                a.item(href="#")
+                a.item(href="/profile")
                     i.info.circle.icon
                     |
                     | #{ bundles[lang]['profile'] }
-                a#settings.item(href="#")
+                a.item(href="/settings")
                     i.wrench.icon
                     |
                     | #{ bundles[lang]['settings'] }
-                a#logout.item(href="#")
+                buttom#logout.item
                     i.sign.out.icon
                     |
                     | #{ bundles[lang]['logout'] }

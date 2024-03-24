@@ -1,0 +1,35 @@
+extends layout
+
+block append style
+    include:css css/dashboard.css
+
+block content
+    include sidebar
+
+    .pusher
+        include navbar
+
+        .main-content
+            .ui.container
+                .ui.card
+                    .image
+                        img(src="profile-picture.jpg", alt="Profile Picture")
+                    .content
+                        .header John Doe
+                        .meta
+                            span(class="date") Joined in 2013
+                        .description
+                            p John Doe is a short description of the user.
+                    .extra.content
+                        a(href="#")
+                            i(class="user icon")
+                            | Friends
+                        a(href="#")
+                            i(class="user icon")
+                            | 100
+                        a(href="#")
+                            i(class="user icon")
+                            | 100
+
+block append script
+    include:closure js/dashboard.js

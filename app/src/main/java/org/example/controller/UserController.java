@@ -16,8 +16,10 @@ import javax.inject.Inject;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.example.annoation.APIEndpoint;
 import org.example.annoation.Controller;
+import org.example.annoation.Endpoint;
 import org.example.annoation.authorization.PermitAll;
 import org.example.common.HTTPMethod;
 import org.example.dto.ResultDTO;
@@ -26,6 +28,7 @@ import org.example.entity.User;
 import org.example.mapper.UserMapper;
 import org.example.service.UserService;
 import org.example.util.Utility;
+import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 
@@ -71,4 +74,10 @@ public class UserController extends AbstractController {
         response.cookie("/", "lang", language, (int) TimeUnit.DAYS.toSeconds(28), false, false);
         return success();
     }
+
+    @Endpoint(method = HTTPMethod.GET, path = "/profile")
+    public ModelAndView serveProfile(Request request, Response response) {
+        return makeView("profile", Pair.of("title", getLocalization().getString(request, "profile")));
+    }
+
 }
