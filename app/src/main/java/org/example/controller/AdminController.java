@@ -129,4 +129,15 @@ public class AdminController extends AbstractController {
 
         return success();
     }
+
+    @APIEndpoint(method = HTTPMethod.GET, path = "/api/v1/admin/roles")
+    public ResultDTO<List<AuthorizationRole>> getAllRoles(Request request, Response response) throws SQLException {
+        List<AuthorizationRole> roles = new ArrayList<>();
+        roles.add(AuthorizationRole.ROLE_ADMIN);
+        roles.add(AuthorizationRole.ROLE_PROVIDER);
+        roles.add(AuthorizationRole.ROLE_CUSTOMER);
+        roles.add(AuthorizationRole.ROLE_USER);
+
+        return success(roles);
+    }
 }

@@ -134,3 +134,7 @@ const getSystemLogsByTypesForDataTables = (params, types) => {
     params
   );
 };
+
+const getAllRoles = () => {
+  return request("/api/v1/admin/roles", "GET");
+}

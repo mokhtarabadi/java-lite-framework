@@ -112,7 +112,14 @@ const editAction = async () => {
 // new action
 const newAction = async () => {};
 
-$(document).ready(function () {
+$(document).ready(async function () {
+  try {
+    const result = await getAllRoles();
+    console.log(result);
+  } catch (error) {
+    console.log(error);
+  }
+
   // TODO: need to call a method to get system roles?
   let option = {};
   option.value = "ROLE_ADMIN";
@@ -121,6 +128,16 @@ $(document).ready(function () {
 
   option.value = "ROLE_USER";
   option.text = getString("admin.users.roles.user");
+  roles.append($("<option>", option));
+
+  // ROLE_PROVIDER
+  option.value = "ROLE_PROVIDER";
+  option.text = getString("admin.users.roles.provider");
+  roles.append($("<option>", option));
+
+  // ROLE_CUSTOMER
+  option.value = "ROLE_CUSTOMER";
+  option.text = getString("admin.users.roles.customer");
   roles.append($("<option>", option));
 
   roles.dropdown();
@@ -198,6 +215,10 @@ $(document).ready(function () {
               roles.push(getString("admin.users.roles.admin"));
             } else if (data[i] === "ROLE_USER") {
               roles.push(getString("admin.users.roles.user"));
+            } else if (data[i] === "ROLE_PROVIDER") {
+              roles.push(getString("admin.users.roles.provider"));
+            } else if (data[i] === "ROLE_CUSTOMER") {
+              roles.push(getString("admin.users.roles.customer"));
             }
           }
           return roles.join(", ");
