@@ -27,6 +27,9 @@ public class AppConfig {
     private final String databaseUsername;
     private final String databasePassword;
 
+    private final String redisUrl;
+    private final String redisPassword;
+
     public AppConfig(@NotNull Config config) {
         this.config = config;
 
@@ -44,5 +47,8 @@ public class AppConfig {
         databaseUrl = config.getString("database.url");
         databaseUsername = config.getString("database.username");
         databasePassword = config.getString("database.password");
+
+        redisUrl = config.getString("redis.url");
+        redisPassword = config.getString("redis.password");
     }
 }

@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.swing.*;
+
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.example.config.AppConfig;
 import org.example.di.AppComponent;
 import org.example.di.DaggerAppComponent;
 import org.example.util.Utility;
+import org.redisson.api.RedissonClient;
 import spark.Spark;
 
 @Slf4j
@@ -81,6 +84,7 @@ public class App {
 
     private void stopServer() {
         log.info("stopping app");
+        databaseMigration.release();
         Spark.stop();
         Spark.awaitStop();
     }

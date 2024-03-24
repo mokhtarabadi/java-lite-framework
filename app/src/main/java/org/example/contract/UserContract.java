@@ -16,5 +16,5 @@ public interface UserContract {
 
     UserState addNewUser(UserDTO dto) throws SQLException;
 
-    User getUser(UUID uuid);
+    User getUser(UUID uuid) throws SQLException;
 }

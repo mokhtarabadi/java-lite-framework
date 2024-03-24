@@ -31,6 +31,9 @@ import org.example.repository.UserRoleRepository;
 import org.example.state.LoginState;
 import org.example.state.UserState;
 import org.mindrot.jbcrypt.BCrypt;
+import org.redisson.api.RMapCache;
+import org.redisson.api.RedissonClient;
+
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
@@ -38,6 +41,8 @@ import org.mindrot.jbcrypt.BCrypt;
 public class UserService implements UserContract, AuthContract {
 
     @NonNull private ConnectionSource connectionSource;
+
+    @NonNull private RedissonClient redissonClient;
 
     @NonNull private UserRepository userRepository;
 
@@ -47,20 +52,7 @@ public class UserService implements UserContract, AuthContract {
 
     @NonNull private LogService logService;
 
-    private final LoadingCache<UUID, User> userCache = Caffeine.newBuilder()
-            // .executor(Executors.newSingleThreadExecutor())
-            .maximumSize(100)
-            .expireAfterWrite(10, TimeUnit.MINUTES)
-            .build(username -> {
-                User user = userRepository.read(username);
-                if (user == null) {
-                    log.debug("User not found: {}", username);
-                    return null;
-                }
-
-                log.trace("get user from db: {}", user);
-                return user;
-            });
+    private RMapCache<UUID, User> userCache;
 
     @Override
     public LoginState validateUserCredentials(LoginDTO dto) throws SQLException {
@@ -109,7 +101,7 @@ public class UserService implements UserContract, AuthContract {
         log.info("Added role {} to user {}", role.name(), user.getUsername());
 
         // refresh cache
-        userCache.invalidate(uuid);
+        userCache.remove(uuid);
     }
 
     @Override
@@ -129,11 +121,11 @@ public class UserService implements UserContract, AuthContract {
         logService.makeLog(Log.Type.ROLE_CHANGED, Pair.of("type", "removed"), Pair.of("role", role.name()));
         log.info("Removed role {} from user {}", role.name(), user.getUsername());
 
-        userCache.invalidate(uuid);
+        userCache.remove(uuid);
     }
 
     @Override
-    public boolean doesUserHaveRole(UUID uuid, AuthorizationRole role) {
+    public boolean doesUserHaveRole(UUID uuid, AuthorizationRole role) throws SQLException {
         User user = getUser(uuid);
         if (user == null) {
             return false;
@@ -172,7 +164,7 @@ public class UserService implements UserContract, AuthContract {
             userRoleRepository.deleteByUserId(uuid);
             userRepository.deleteById(uuid);
 
-            userCache.invalidate(uuid);
+            userCache.remove(uuid);
             return UserState.builder().state(UserState.State.SUCCESS).build();
         });
     }
@@ -243,7 +235,7 @@ public class UserService implements UserContract, AuthContract {
             }
 
             userRepository.update(user);
-            userCache.invalidate(uuid);
+            userCache.remove(uuid);
 
             return UserState.builder().state(UserState.State.SUCCESS).build();
         });
@@ -289,7 +281,26 @@ public class UserService implements UserContract, AuthContract {
     }
 
     @Override
-    public User getUser(UUID uuid) {
-        return userCache.get(uuid);
+    public User getUser(UUID uuid) throws SQLException {
+        if (userCache == null) {
+            userCache = redissonClient.getMapCache("users"); // <UUID, User>
+            userCache.setMaxSize(100);
+            userCache.setExpire(10, TimeUnit.MINUTES);
+        }
+
+        User cachedUser = userCache.get(uuid);
+        if (cachedUser == null) {
+            User user = userRepository.read(uuid);
+            if (user == null) {
+                log.debug("User not found: {}", uuid);
+                return null;
+            }
+
+            log.debug("get user from db: {}", user);
+            return userCache.put(uuid, user, 10, TimeUnit.MINUTES);
+        }
+
+        log.debug("get user from cache: {}", cachedUser);
+        return cachedUser;
     }
 }

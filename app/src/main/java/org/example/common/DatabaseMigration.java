@@ -38,4 +38,9 @@ public class DatabaseMigration {
 
         flyway.migrate();
     }
+
+    public void release() {
+        connectionSource.closeQuietly();
+        hikariDataSource.close();
+    }
 }

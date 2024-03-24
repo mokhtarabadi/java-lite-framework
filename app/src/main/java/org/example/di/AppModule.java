@@ -17,12 +17,16 @@ import java.util.*;
 import javax.inject.Singleton;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.example.common.ClosureFilter;
 import org.example.common.CustomValidator;
 import org.example.common.Localization;
 import org.example.common.PugTemplateEngine;
 import org.example.config.AppConfig;
 import org.jetbrains.annotations.NotNull;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.SingleServerConfig;
 import spark.TemplateEngine;
 
 @Module
@@ -83,6 +87,18 @@ public class AppModule {
     public ConnectionSource provideConnectionSource(@NotNull HikariDataSource hikariDataSource) {
         MariaDbDatabaseType mariaDbDatabaseType = new MariaDbDatabaseType();
         return new DataSourceConnectionSource(hikariDataSource, mariaDbDatabaseType);
+    }
+
+    @Provides
+    @Singleton
+    public RedissonClient provideRedissonClient(@NotNull AppConfig appConfig) {
+        org.redisson.config.Config config = new org.redisson.config.Config();
+        SingleServerConfig singleServerConfig = config.useSingleServer().setAddress(appConfig.getRedisUrl());
+        if (StringUtils.isNotBlank(appConfig.getRedisPassword())) {
+            singleServerConfig.setPassword(appConfig.getRedisPassword());
+        }
+        RedissonClient redissonClient = Redisson.create(config);
+        return redissonClient;
     }
 
     @Provides

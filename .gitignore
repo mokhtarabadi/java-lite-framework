@@ -50,3 +50,4 @@ gradle-app.setting
 .gradletasknamecache
 .project
 .classpath
+app.log

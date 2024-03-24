@@ -14,5 +14,5 @@ public interface AuthContract {
 
     void revokeRoleFromUser(UUID uuid, AuthorizationRole role) throws SQLException;
 
-    boolean doesUserHaveRole(UUID uuid, AuthorizationRole role);
+    boolean doesUserHaveRole(UUID uuid, AuthorizationRole role) throws SQLException;
 }
