@@ -7,13 +7,19 @@
  */
 package org.example.common;
 
+import com.google.gson.annotations.SerializedName;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
 public enum AuthorizationRole {
+    @SerializedName("admin")
     ROLE_ADMIN("admin"),
+    @SerializedName("user")
     ROLE_USER("user"),
+    @SerializedName("customer")
     ROLE_CUSTOMER("customer"),
+    @SerializedName("provider")
     ROLE_PROVIDER("provider");
 
     private final String role;
@@ -35,5 +41,9 @@ public enum AuthorizationRole {
             default:
                 return null;
         }
+    }
+
+    public static List<AuthorizationRole> all() {
+        return List.of(ROLE_ADMIN, ROLE_USER, ROLE_CUSTOMER, ROLE_PROVIDER);
     }
 }

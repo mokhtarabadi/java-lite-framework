@@ -115,32 +115,20 @@ const newAction = async () => {};
 $(document).ready(async function () {
   try {
     const result = await getAllRoles();
-    console.log(result);
+    let option = {};
+    result.data.forEach(item => {
+      const key = Object.keys(item)[0];
+      const value = item[key];
+
+      option.value = key;
+      option.text = value;
+      roles.append($("<option>", option));
+    });
+    roles.dropdown();
   } catch (error) {
+    showToastError(error);
     console.log(error);
   }
-
-  // TODO: need to call a method to get system roles?
-  let option = {};
-  option.value = "ROLE_ADMIN";
-  option.text = getString("admin.users.roles.admin");
-  roles.append($("<option>", option));
-
-  option.value = "ROLE_USER";
-  option.text = getString("admin.users.roles.user");
-  roles.append($("<option>", option));
-
-  // ROLE_PROVIDER
-  option.value = "ROLE_PROVIDER";
-  option.text = getString("admin.users.roles.provider");
-  roles.append($("<option>", option));
-
-  // ROLE_CUSTOMER
-  option.value = "ROLE_CUSTOMER";
-  option.text = getString("admin.users.roles.customer");
-  roles.append($("<option>", option));
-
-  roles.dropdown();
 
   table = $("#users").DataTable({
     serverSide: true,
@@ -211,13 +199,13 @@ $(document).ready(async function () {
           // seperated by comma and convert ROLE_ADMIN to Admin and ROLE_USER to User
           let roles = [];
           for (let i = 0; i < data.length; i++) {
-            if (data[i] === "ROLE_ADMIN") {
+            if (data[i] === "admin") {
               roles.push(getString("admin.users.roles.admin"));
-            } else if (data[i] === "ROLE_USER") {
+            } else if (data[i] === "user") {
               roles.push(getString("admin.users.roles.user"));
-            } else if (data[i] === "ROLE_PROVIDER") {
+            } else if (data[i] === "provider") {
               roles.push(getString("admin.users.roles.provider"));
-            } else if (data[i] === "ROLE_CUSTOMER") {
+            } else if (data[i] === "customer") {
               roles.push(getString("admin.users.roles.customer"));
             }
           }

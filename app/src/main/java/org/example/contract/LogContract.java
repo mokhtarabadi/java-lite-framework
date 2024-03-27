@@ -21,7 +21,5 @@ public interface LogContract {
 
     DataTableDTO<LogDTO> fetchLogsForDataTable(DataTableRequestDTO dto, Log.Type... types) throws SQLException;
 
-    List<LogDTO> getLogsPerTypeAndUser(UUID userId, int limit, Log.Type... types) throws SQLException;
-
     void deleteLog(UUID id) throws SQLException;
 }

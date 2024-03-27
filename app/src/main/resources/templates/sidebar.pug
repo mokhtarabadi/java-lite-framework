@@ -24,4 +24,18 @@
                         a.item(href="/admin/logs/system")
                             i.info.icon
                             | #{ bundles[lang]['sidebar.admin.logs.system'] }
+
+    // provider dashboard sub menu
+    if user.isProvider()
+        .item
+            i.user.cirlce.icon
+            | #{ bundles[lang]['sidebar.provider'] }
+            .menu
+
+    // customer dashboard sub menu
+    if user.isCustomer()
+        .item
+            i.user.cirlce.icon
+            | #{ bundles[lang]['sidebar.customer'] }
+            .menu
 // sidebar

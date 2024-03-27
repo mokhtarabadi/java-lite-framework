@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Singleton;
 import lombok.NonNull;
 import org.example.common.LoadingCache;
+import org.example.entity.Node;
 import org.example.entity.User;
 import org.redisson.api.RedissonClient;
 
@@ -25,6 +26,15 @@ public class CacheModule {
     public LoadingCache<UUID, User> provideUserCache(@NonNull RedissonClient redissonClient) {
         LoadingCache.Config config = new LoadingCache.Config();
         config.setName("users");
+        config.setExpirationSeconds(TimeUnit.MINUTES.toSeconds(10));
+        return new LoadingCache<>(redissonClient, config);
+    }
+
+    @Provides
+    @Singleton
+    public LoadingCache<UUID, Node> provideNodeCache(@NonNull RedissonClient redissonClient) {
+        LoadingCache.Config config = new LoadingCache.Config();
+        config.setName("nodes");
         config.setExpirationSeconds(TimeUnit.MINUTES.toSeconds(10));
         return new LoadingCache<>(redissonClient, config);
     }

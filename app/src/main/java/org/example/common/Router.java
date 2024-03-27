@@ -77,8 +77,12 @@ public class Router {
 
     @NonNull private DashboardController dashboardController;
 
+    @NonNull private CustomerController customerController;
+
+    @NonNull private ProviderController providerController;
+
     private Map<Class<?>, Object> getControllers() {
-        return Arrays.stream(new Object[] {authController, userController, adminController, dashboardController})
+        return Arrays.stream(new Object[] {authController, userController, adminController, dashboardController, customerController, providerController})
                 .collect(Collectors.toMap(Object::getClass, o -> o));
     }
 

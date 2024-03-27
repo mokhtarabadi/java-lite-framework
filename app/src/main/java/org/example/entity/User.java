@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 import lombok.*;
+import org.example.common.AuthorizationRole;
 
 @DatabaseTable(tableName = "users")
 @Data
@@ -61,7 +62,17 @@ public class User implements Serializable {
     // utility methods
     public boolean isAdmin() {
         return userRoles.stream()
-                .anyMatch(userRole -> userRole.getRole().getName().equals("ROLE_ADMIN"));
+                .anyMatch(userRole -> userRole.getRole().getName().equals(AuthorizationRole.ROLE_ADMIN.getRole()));
+    }
+
+    public boolean isProvider() {
+        return userRoles.stream()
+                .anyMatch(userRole -> userRole.getRole().getName().equals(AuthorizationRole.ROLE_PROVIDER.getRole()));
+    }
+
+    public boolean isCustomer() {
+        return userRoles.stream()
+                .anyMatch(userRole -> userRole.getRole().getName().equals(AuthorizationRole.ROLE_CUSTOMER.getRole()));
     }
 
     public boolean isActive() {

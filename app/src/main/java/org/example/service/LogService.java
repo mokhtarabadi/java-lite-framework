@@ -79,13 +79,6 @@ public class LogService implements LogContract {
     }
 
     @Override
-    public List<LogDTO> getLogsPerTypeAndUser(UUID userId, int limit, Log.Type... types) throws SQLException {
-        return logRepository.getByTypeAndUserId(userId, limit, types).stream()
-                .map(LogMapper.INSTANCE::mapFromEntity)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public void deleteLog(UUID id) throws SQLException {
         logRepository.deleteById(id);
     }

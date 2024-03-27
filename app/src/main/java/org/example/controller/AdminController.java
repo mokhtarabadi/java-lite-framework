@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +43,6 @@ public class AdminController extends AbstractController {
     @NonNull private CustomValidator validator;
 
     @NonNull private Gson gson;
-
-    @NonNull private AppConfig appConfig;
 
     @NonNull private UserService userService;
 
@@ -131,13 +130,11 @@ public class AdminController extends AbstractController {
     }
 
     @APIEndpoint(method = HTTPMethod.GET, path = "/api/v1/admin/roles")
-    public ResultDTO<List<AuthorizationRole>> getAllRoles(Request request, Response response) throws SQLException {
-        List<AuthorizationRole> roles = new ArrayList<>();
-        roles.add(AuthorizationRole.ROLE_ADMIN);
-        roles.add(AuthorizationRole.ROLE_PROVIDER);
-        roles.add(AuthorizationRole.ROLE_CUSTOMER);
-        roles.add(AuthorizationRole.ROLE_USER);
-
-        return success(roles);
+    public ResultDTO<List<Map<String, String>>> getAllRoles(Request request, Response response) {
+        return success(AuthorizationRole.all().stream().map(authorizationRole -> {
+            Map<String, String> map = new HashMap<>();
+            map.put(authorizationRole.getRole(), getLocalization().getString(request, "admin.users.roles." + authorizationRole.getRole()));
+            return map;
+        }).collect(Collectors.toList()));
     }
 }

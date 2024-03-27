@@ -31,6 +31,13 @@ public class DatabaseMigration {
         TableUtils.createTableIfNotExists(connectionSource, UserRole.class);
         TableUtils.createTableIfNotExists(connectionSource, Log.class);
         TableUtils.createTableIfNotExists(connectionSource, SystemConfig.class);
+        TableUtils.createTableIfNotExists(connectionSource, Node.class);
+        TableUtils.createTableIfNotExists(connectionSource, Client.class);
+        TableUtils.createTableIfNotExists(connectionSource, Application.class);
+        TableUtils.createTableIfNotExists(connectionSource, Invoice.class);
+        TableUtils.createTableIfNotExists(connectionSource, Order.class);
+        TableUtils.createTableIfNotExists(connectionSource, Plan.class);
+        TableUtils.createTableIfNotExists(connectionSource, Session.class);
 
         // configure flyway
         Flyway flyway = Flyway.configure()

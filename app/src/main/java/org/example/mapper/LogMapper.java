@@ -23,16 +23,4 @@ public interface LogMapper {
 
     LogDTO mapFromEntity(Log entity);
 
-    default Log mapFromRawQuery(String[] values) {
-        Log log = new Log();
-        log.setId(UUID.fromString(values[0]));
-        log.setType(Log.Type.fromValue(values[1]));
-        log.setData(Utility.getInstance().toMap(values[2]));
-        log.setCreatedAt(new Date(Long.parseLong(values[3])));
-
-        if (ObjectUtils.isNotEmpty(values[4])) {
-            log.setUpdatedAt(new Date(Long.parseLong(values[4])));
-        }
-        return log;
-    }
 }

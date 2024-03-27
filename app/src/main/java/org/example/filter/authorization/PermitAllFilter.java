@@ -28,9 +28,12 @@ public class PermitAllFilter implements Filter {
         // find user from jwt token from cookie.
         UUID id = request.attribute("userId");
 
-        if (!userService.doesUserHaveRole(id, AuthorizationRole.ROLE_USER)
-                && !userService.doesUserHaveRole(id, AuthorizationRole.ROLE_ADMIN)) {
-            throw new AccessDenied();
+        for (AuthorizationRole role : AuthorizationRole.all()) {
+            if (userService.doesUserHaveRole(id, role)) {
+                return;
+            }
         }
+
+        throw new AccessDenied();
     }
 }
