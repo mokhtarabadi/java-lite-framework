@@ -45,6 +45,9 @@ public class LoadingCache<K, V> {
         V value = cache.get(key);
         if (value == null) {
             value = loader.load(key);
+            if (value == null) {
+                return null;
+            }
             cache.fastPut(key, value, config.expirationSeconds, TimeUnit.SECONDS);
         }
         log.trace("get key: {}, value: {} from cache", key, value);
