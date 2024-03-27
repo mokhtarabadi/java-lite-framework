@@ -20,7 +20,7 @@ public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(target = "createdAt", ignore = true) // generated using reflection
-    @Mapping(target = "userRoles", ignore = true) // automatically must fill
+    @Mapping(target = "userRoles", ignore = true) // automatically must-fill
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "clazz", constant = "0")
     @Mapping(target = "active", constant = "true")

@@ -79,5 +79,4 @@ public class UserController extends AbstractController {
     public ModelAndView serveProfile(Request request, Response response) {
         return makeView("profile", Pair.of("title", getLocalization().getString(request, "profile")));
     }
-
 }

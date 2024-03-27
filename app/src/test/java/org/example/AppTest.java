@@ -7,4 +7,12 @@
  */
 package org.example;
 
-public class AppTest {}
+import org.example.common.AuthorizationRole;
+
+public class AppTest {
+
+
+    public static void main(String[] args) {
+
+    }
+}

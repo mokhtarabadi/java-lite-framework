@@ -98,20 +98,20 @@ public class UserService implements UserContract, AuthContract {
         User user = getUser(uuid);
 
         if (user.getUserRoles().stream()
-                .anyMatch(userRole -> userRole.getRole().getName().equals(role.name()))) {
-            log.error("User {} already has role {}", user.getUsername(), role.name());
+                .anyMatch(userRole -> userRole.getRole().getName().equals(role.getRole()))) {
+            log.error("User {} already has role {}", user.getUsername(), role.getRole());
             return;
         }
 
-        UserRole userRole = new UserRole(user, roleRepository.getByName(role.name()));
+        UserRole userRole = new UserRole(user, roleRepository.getByName(role.getRole()));
         userRoleRepository.create(userRole);
 
         logService.makeLog(
                 Log.Type.ROLE_CHANGED,
                 Pair.of("type", "added"),
-                Pair.of("role", role.name()),
+                Pair.of("role", role.getRole()),
                 Pair.of("username", user.getUsername()));
-        log.info("Added role {} to user {}", role.name(), user.getUsername());
+        log.info("Added role {} to user {}", role.getRole(), user.getUsername());
 
         // refresh cache
         userCache.remove(uuid);
@@ -122,17 +122,17 @@ public class UserService implements UserContract, AuthContract {
         User user = getUser(uuid);
 
         Optional<UserRole> userRole1 = user.getUserRoles().stream()
-                .filter(userRole -> userRole.getRole().getName().equals(role.name()))
+                .filter(userRole -> userRole.getRole().getName().equals(role.getRole()))
                 .findFirst();
         if (userRole1.isEmpty()) {
-            log.error("User {} not has role {}", user.getUsername(), role.name());
+            log.error("User {} not has role {}", user.getUsername(), role.getRole());
             return;
         }
 
         userRoleRepository.delete(userRole1.get());
 
-        logService.makeLog(Log.Type.ROLE_CHANGED, Pair.of("type", "removed"), Pair.of("role", role.name()));
-        log.info("Removed role {} from user {}", role.name(), user.getUsername());
+        logService.makeLog(Log.Type.ROLE_CHANGED, Pair.of("type", "removed"), Pair.of("role", role.getRole()));
+        log.info("Removed role {} from user {}", role.getRole(), user.getUsername());
 
         userCache.remove(uuid);
     }
@@ -145,7 +145,7 @@ public class UserService implements UserContract, AuthContract {
         }
 
         return user.getUserRoles().stream()
-                .anyMatch(userRole -> userRole.getRole().getName().equals(role.name()));
+                .anyMatch(userRole -> userRole.getRole().getName().equals(role.getRole()));
     }
 
     @Override
@@ -187,9 +187,7 @@ public class UserService implements UserContract, AuthContract {
         User user = getUser(uuid);
 
         List<AuthorizationRole> existingRoles = user.getUserRoles().stream()
-                .map(userRole -> userRole.getRole().getName().equals("ROLE_ADMIN")
-                        ? AuthorizationRole.ROLE_ADMIN
-                        : AuthorizationRole.ROLE_USER)
+                .map(userRole -> AuthorizationRole.from(userRole.getRole().getName()))
                 .collect(Collectors.toList());
 
         return TransactionManager.callInTransaction(connectionSource, () -> {
@@ -210,18 +208,11 @@ public class UserService implements UserContract, AuthContract {
             if (dto.getRoles() != null) {
                 List<AuthorizationRole> newRoles = new ArrayList<>();
                 for (String role : dto.getRoles()) {
-                    AuthorizationRole role1;
-                    switch (role) {
-                        case "ROLE_ADMIN":
-                            role1 = AuthorizationRole.ROLE_ADMIN;
-                            break;
-                        case "ROLE_USER":
-                            role1 = AuthorizationRole.ROLE_USER;
-                            break;
-                        default:
-                            return UserState.builder()
-                                    .state(UserState.State.INVALID_ROLE)
-                                    .build();
+                    AuthorizationRole role1 = AuthorizationRole.from(role);
+                    if (role1 == null) {
+                        return UserState.builder()
+                                .state(UserState.State.INVALID_ROLE)
+                                .build();
                     }
                     newRoles.add(role1);
                 }
