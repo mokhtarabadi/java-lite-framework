@@ -116,7 +116,7 @@ $(document).ready(async function () {
   try {
     const result = await getAllRoles();
     let option = {};
-    result.data.forEach(item => {
+    result.data.forEach((item) => {
       const key = Object.keys(item)[0];
       const value = item[key];
 

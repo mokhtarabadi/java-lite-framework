@@ -1,7 +1,17 @@
+/*
+ * Apache License 2.0
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Copyright [2024] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]
+ */
 package org.example.service;
 
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.support.ConnectionSource;
+import java.sql.SQLException;
+import java.util.UUID;
+import javax.inject.Inject;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +26,6 @@ import org.example.repository.NodeRepository;
 import org.example.repository.UserRepository;
 import org.example.state.NodeState;
 
-import javax.inject.Inject;
-import java.sql.SQLException;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__({@Inject}))
 public class ProviderService implements NodeContract {
@@ -28,6 +33,7 @@ public class ProviderService implements NodeContract {
     @NonNull private ConnectionSource connectionSource;
 
     @NonNull private UserRepository userRepository;
+
     @NonNull private NodeRepository nodeRepository;
 
     @NonNull private LoadingCache<UUID, Node> nodeCache;

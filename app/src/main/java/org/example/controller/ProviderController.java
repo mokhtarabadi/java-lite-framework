@@ -1,6 +1,20 @@
+/*
+ * Apache License 2.0
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Copyright [2024] [Mohammad Reza Mokhtarabadi <mmokhtarabadi@gmail.com>]
+ */
 package org.example.controller;
 
+import static org.example.controller.AbstractController.failure;
+import static org.example.controller.AbstractController.success;
+
 import com.google.gson.Gson;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.UUID;
+import javax.inject.Inject;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +30,6 @@ import org.example.service.ProviderService;
 import org.example.state.NodeState;
 import spark.Request;
 import spark.Response;
-
-import javax.inject.Inject;
-import javax.xml.validation.Validator;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.UUID;
-
-import static org.example.controller.AbstractController.failure;
-import static org.example.controller.AbstractController.success;
 
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Inject))

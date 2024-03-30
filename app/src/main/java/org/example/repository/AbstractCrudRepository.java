@@ -8,13 +8,9 @@
 package org.example.repository;
 
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
-import com.j256.ormlite.stmt.Where;
+import com.j256.ormlite.stmt.*;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +21,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.example.dto.DataTableRequestDTO;
+import org.example.entity.Log;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -101,7 +98,7 @@ public abstract class AbstractCrudRepository<T> {
             String search,
             int columnIndex,
             @NotNull String orderDir,
-            Pair<String, Pair<String, Object>>... whereClauses)
+            Pair<String, Pair<String, Log.Type[]>>... whereClauses) // FIXME: make it generic
             throws SQLException {
 
         QueryBuilder<T, UUID> queryBuilder = generateQueryBuilderForDataTable(columns, search, whereClauses);
@@ -120,7 +117,9 @@ public abstract class AbstractCrudRepository<T> {
 
     @SafeVarargs
     public final long countForDataTable(
-            List<DataTableRequestDTO.Column> columns, String search, Pair<String, Pair<String, Object>>... whereClauses)
+            List<DataTableRequestDTO.Column> columns,
+            String search,
+            Pair<String, Pair<String, Log.Type[]>>... whereClauses)
             throws SQLException {
         QueryBuilder<T, UUID> queryBuilder = generateQueryBuilderForDataTable(columns, search, whereClauses);
 
@@ -134,7 +133,7 @@ public abstract class AbstractCrudRepository<T> {
     private QueryBuilder<T, UUID> generateQueryBuilderForDataTable(
             @NotNull List<DataTableRequestDTO.Column> columns,
             String search,
-            Pair<String, Pair<String, Object>>... whereClauses)
+            Pair<String, Pair<String, Log.Type[]>>... whereClauses)
             throws SQLException {
         QueryBuilder<T, UUID> queryBuilder = getDao().queryBuilder();
 
@@ -155,21 +154,19 @@ public abstract class AbstractCrudRepository<T> {
 
         // add other where clauses
         count = 0;
-        for (Pair<String, Pair<String, Object>> whereClause : whereClauses) {
+        for (Pair<String, Pair<String, Log.Type[]>> whereClause : whereClauses) {
             String columnName = whereClause.getValue().getKey();
-            SelectArg[] values = Arrays.stream((Object[]) whereClause.getValue().getValue())
-                    .map(SelectArg::new)
-                    .toArray(SelectArg[]::new);
+            Log.Type[] values = whereClause.getValue().getValue(); // FIXME: Use SelectArg
 
             if (getDao().getTableInfo().hasColumnName(columnName)) {
                 String operator = whereClause.getKey();
                 switch (operator) {
                     case "in":
-                        where.in(columnName, (Object[]) values);
+                        where.and().in(columnName, (Object[]) values);
                         count++;
                         break;
                     case "not_in":
-                        where.notIn(columnName, (Object[]) values);
+                        where.and().notIn(columnName, (Object[]) values);
                         count++;
                         break;
                     default:

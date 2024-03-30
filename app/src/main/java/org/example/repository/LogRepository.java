@@ -7,19 +7,13 @@
  */
 package org.example.repository;
 
-import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.stmt.QueryBuilder;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.entity.Log;
-import org.example.mapper.LogMapper;
-import org.jetbrains.annotations.NotNull;
 
 @NoArgsConstructor(onConstructor = @__(@Inject))
 @Slf4j

@@ -1,35 +1,23 @@
-extends layout
+extends dashboard
 
-block append style
-    include:css css/dashboard.css
-
-block content
-    include sidebar
-
-    .pusher
-        include navbar
-
-        .main-content
-            .ui.container
-                .ui.card
-                    .image
-                        img(src="profile-picture.jpg", alt="Profile Picture")
-                    .content
-                        .header John Doe
-                        .meta
-                            span.date Joined in 2013
-                        .description
-                            p John Doe is a short description of the user.
-                    .extra.content
-                        a(href="#")
-                            i.user.icon
-                            | Friends
-                        a(href="#")
-                            i.user.icon
-                            | 100
-                        a(href="#")
-                            i.user.icon
-                            | 100
-
-block append script
-    include:closure js/dashboard.js
+block main-content
+    .ui.container
+        .ui.card
+            .image
+                img(src="profile-picture.jpg", alt="Profile Picture")
+            .content
+                .header John Doe
+                .meta
+                    span.date Joined in 2013
+                .description
+                    p John Doe is a short description of the user.
+            .extra.content
+                a(href="#")
+                    i.user.icon
+                    | Friends
+                a(href="#")
+                    i.user.icon
+                    | 100
+                a(href="#")
+                    i.user.icon
+                    | 100

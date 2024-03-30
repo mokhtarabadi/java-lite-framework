@@ -290,8 +290,8 @@
 function tryGetLocalizedString(key) {
   let locale = localStorage.getItem("lang");
 
-  if (bundles[locale] === undefined) {
-    return key;
+  if (locale === null) {
+    locale = defaultLocale;
   }
 
   if (bundles[locale][key] === undefined) {

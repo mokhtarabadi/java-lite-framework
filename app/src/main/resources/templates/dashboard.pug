@@ -1,16 +1,23 @@
 extends layout
 
 block append style
+    link(rel="stylesheet", type="text/css", href="/dist/datatables.min.css")
     include:css css/dashboard.css
 
 block content
     include sidebar
 
+    // flayout
+    block flayout
+
     .pusher
         include navbar
 
+        // main content
         .main-content
+            block main-content
 
 block append script
-    include:closure js/dashboard.js
+    script(src="/dist/datatables.min.js")
     include:closure js/api_user.js
+    include:closure js/dashboard.js

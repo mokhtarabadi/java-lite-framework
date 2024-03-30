@@ -24,7 +24,6 @@ import org.example.annoation.authorization.RolesAllowed;
 import org.example.common.AuthorizationRole;
 import org.example.common.CustomValidator;
 import org.example.common.HTTPMethod;
-import org.example.config.AppConfig;
 import org.example.dto.*;
 import org.example.entity.Log;
 import org.example.service.*;
@@ -131,10 +130,14 @@ public class AdminController extends AbstractController {
 
     @APIEndpoint(method = HTTPMethod.GET, path = "/api/v1/admin/roles")
     public ResultDTO<List<Map<String, String>>> getAllRoles(Request request, Response response) {
-        return success(AuthorizationRole.all().stream().map(authorizationRole -> {
-            Map<String, String> map = new HashMap<>();
-            map.put(authorizationRole.getRole(), getLocalization().getString(request, "admin.users.roles." + authorizationRole.getRole()));
-            return map;
-        }).collect(Collectors.toList()));
+        return success(AuthorizationRole.all().stream()
+                .map(authorizationRole -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put(
+                            authorizationRole.getRole(),
+                            getLocalization().getString(request, "admin.users.roles." + authorizationRole.getRole()));
+                    return map;
+                })
+                .collect(Collectors.toList()));
     }
 }

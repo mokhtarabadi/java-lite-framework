@@ -150,25 +150,25 @@ public class UserService implements UserContract, AuthContract {
 
     @Override
     public DataTableDTO<UserDTO> fetchUsersForDataTable(DataTableRequestDTO dto) throws SQLException {
-        return TransactionManager.callInTransaction(connectionSource, () -> {
-            DataTableDTO<UserDTO> dataTableDTO = new DataTableDTO<>();
-            dataTableDTO.setRecordsTotal(userRepository.count());
-            dataTableDTO.setDraw(dto.getDraw());
-            List<User> users = userRepository.queryForDataTable(
-                    dto.getStart(),
-                    dto.getLength(),
-                    dto.getColumns(),
-                    dto.getSearch().getValue(),
-                    dto.getOrder().get(0).getColumn(),
-                    dto.getOrder().get(0).getDir());
-            dataTableDTO.setRecordsFiltered(userRepository.countForDataTable(
-                    dto.getColumns(), dto.getSearch().getValue()));
+        DataTableDTO<UserDTO> dataTableDTO = new DataTableDTO<>();
+        dataTableDTO.setRecordsTotal(userRepository.count());
 
-            dataTableDTO.setData(
-                    users.stream().map(UserMapper.INSTANCE::mapFromEntity).collect(Collectors.toList()));
+        dataTableDTO.setDraw(dto.getDraw());
+        List<User> users = userRepository.queryForDataTable(
+                dto.getStart(),
+                dto.getLength(),
+                dto.getColumns(),
+                dto.getSearch().getValue(),
+                dto.getOrder().get(0).getColumn(),
+                dto.getOrder().get(0).getDir());
 
-            return dataTableDTO;
-        });
+        dataTableDTO.setRecordsFiltered(userRepository.countForDataTable(
+                dto.getColumns(), dto.getSearch().getValue()));
+
+        dataTableDTO.setData(
+                users.stream().map(UserMapper.INSTANCE::mapFromEntity).collect(Collectors.toList()));
+
+        return dataTableDTO;
     }
 
     @Override

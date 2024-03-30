@@ -119,8 +119,7 @@ public class AppModule {
 
     @Provides
     @Singleton
-    public TemplateEngine provideTemplateEngine(
-            @NotNull Localization localization, @NotNull AppConfig appConfig, Gson gson) {
+    public TemplateEngine provideTemplateEngine(@NotNull Localization localization, @NotNull AppConfig appConfig) {
         PugTemplateEngine templateEngine = new PugTemplateEngine("/templates");
         templateEngine.getConfiguration().setPrettyPrint(appConfig.isPrettyPrint());
         templateEngine.getConfiguration().setMode(Pug4J.Mode.HTML);
@@ -143,7 +142,8 @@ public class AppModule {
 
         Map<String, Object> sharedVariables = new HashMap<>();
         sharedVariables.put("bundles", bundles);
-        sharedVariables.put("gson", gson);
+        sharedVariables.put("gson", new Gson());
+        sharedVariables.put("defaultLocale", appConfig.getDefaultLocale());
         sharedVariables.put("supportedLanguages", supportedLanguages);
 
         templateEngine.getConfiguration().setSharedVariables(sharedVariables);

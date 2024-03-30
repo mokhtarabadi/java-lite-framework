@@ -91,7 +91,7 @@ $(document).ready(function () {
       {
         data: "data",
         name: "data",
-        searchable: false,
+        searchable: true,
         orderable: false,
         render: function (data) {
           return JSON.stringify(data);

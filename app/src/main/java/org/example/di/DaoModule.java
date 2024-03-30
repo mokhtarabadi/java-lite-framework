@@ -32,14 +32,18 @@ public class DaoModule {
     @Provides
     public Dao<Role, UUID> provideRoleDao(ConnectionSource connectionSource) {
         log.trace("Providing Role Dao");
-        return DaoManager.createDao(connectionSource, Role.class);
+        Dao<Role, UUID> dao = DaoManager.createDao(connectionSource, Role.class);
+        dao.setObjectCache(true);
+        return dao;
     }
 
     @SneakyThrows
     @Provides
     public Dao<UserRole, UUID> provideUserRoleDao(ConnectionSource connectionSource) {
         log.trace("Providing UserRole Dao");
-        return DaoManager.createDao(connectionSource, UserRole.class);
+        Dao<UserRole, UUID> dao = DaoManager.createDao(connectionSource, UserRole.class);
+        dao.setObjectCache(true);
+        return dao;
     }
 
     @SneakyThrows

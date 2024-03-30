@@ -1,13 +1,7 @@
-extends layout
+extends dashboard
 include mixins
 
-block append style
-    link(rel="stylesheet", type="text/css", href="/dist/datatables.min.css")
-    include:css css/dashboard.css
-
-block content
-    include sidebar
-
+block flayout
     .ui.left.flyout(style="overflow-y: auto")
         i.close.icon
         .ui.header #{ bundles[lang]['admin.users.edit'] }
@@ -79,44 +73,38 @@ block content
                 i.checkmark.icon
                 | #{ bundles[lang]['edit'] }
 
-    // pusher
-    .pusher
-        include navbar
+block main-content
+    .ui.grid.stackable.padded
+        // buttons
+        .two.wide.column
+            .ui.segment
+                h4.ui.center.aligned.header #{ bundles[lang]['actions'] }
+                #buttons.ui.center.aligned.buttons.vertical
+        // table
+        .fourteen.wide.column
+            table#users.ui.celled.table
+                thead
+                    tr
+                        th #{ bundles[lang]['username'] }
+                        th #{ bundles[lang]['email'] }
+                        th #{ bundles[lang]['firstName'] }
+                        th #{ bundles[lang]['lastName'] }
+                        th #{ bundles[lang]['updatedAt'] }
+                        th #{ bundles[lang]['clazz'] }
+                        th #{ bundles[lang]['status'] }
+                        th #{ bundles[lang]['admin.users.roles'] }
 
-        .main-content
-            .ui.grid.stackable.padded
-                // buttons
-                .two.wide.column
-                    .ui.segment
-                        h4.ui.center.aligned.header #{ bundles[lang]['actions'] }
-                        #buttons.ui.center.aligned.buttons.vertical
-                // table
-                .fourteen.wide.column
-                    table#users.ui.celled.table
-                        thead
-                            tr
-                                th #{ bundles[lang]['username'] }
-                                th #{ bundles[lang]['email'] }
-                                th #{ bundles[lang]['firstName'] }
-                                th #{ bundles[lang]['lastName'] }
-                                th #{ bundles[lang]['updatedAt'] }
-                                th #{ bundles[lang]['clazz'] }
-                                th #{ bundles[lang]['status'] }
-                                th #{ bundles[lang]['admin.users.roles'] }
-
-                        tfoot
-                            tr
-                                th #{ bundles[lang]['username'] }
-                                th #{ bundles[lang]['email'] }
-                                th #{ bundles[lang]['firstName'] }
-                                th #{ bundles[lang]['lastName'] }
-                                th #{ bundles[lang]['updatedAt'] }
-                                th #{ bundles[lang]['clazz'] }
-                                th #{ bundles[lang]['status'] }
-                                th #{ bundles[lang]['admin.users.roles'] }
+                tfoot
+                    tr
+                        th #{ bundles[lang]['username'] }
+                        th #{ bundles[lang]['email'] }
+                        th #{ bundles[lang]['firstName'] }
+                        th #{ bundles[lang]['lastName'] }
+                        th #{ bundles[lang]['updatedAt'] }
+                        th #{ bundles[lang]['clazz'] }
+                        th #{ bundles[lang]['status'] }
+                        th #{ bundles[lang]['admin.users.roles'] }
 
 block append script
-    script(src="/dist/datatables.min.js")
-    include:closure js/dashboard.js
     include:closure js/api_admin.js
     include:closure js/admin_users.js
