@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.field.types.StringType;
+import com.j256.ormlite.support.DatabaseResults;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.Map;
@@ -45,33 +46,16 @@ public class MapPersister extends StringType {
     }
 
     @Override
-    public boolean isAppropriateId() {
-        return false;
-    }
-
-    @Override
-    public int getDefaultWidth() {
-        return 0;
-    }
-
-    @Override
     public Class<?> getPrimaryClass() {
-        return Map.class;
+        return (Class<?>) TYPE;
     }
 
     @Override
-    public Object sqlArgToJava(FieldType fieldType, Object sqlArg, int columnPos) throws SQLException {
-        if (sqlArg == null) {
+    public Object resultToSqlArg(FieldType fieldType, DatabaseResults results, int columnPos) throws SQLException {
+        String json = results.getString(columnPos);
+        if (json == null) {
             return null;
         }
-        return gson.fromJson((String) sqlArg, TYPE);
-    }
-
-    @Override
-    public Object javaToSqlArg(FieldType fieldType, Object javaObject) throws SQLException {
-        if (javaObject == null) {
-            return null;
-        }
-        return gson.toJson(javaObject, TYPE);
+        return gson.fromJson(json, TYPE);
     }
 }

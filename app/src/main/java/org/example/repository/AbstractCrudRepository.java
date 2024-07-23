@@ -21,7 +21,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.example.dto.DataTableRequestDTO;
-import org.example.entity.Log;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -98,7 +97,7 @@ public abstract class AbstractCrudRepository<T> {
             String search,
             int columnIndex,
             @NotNull String orderDir,
-            Pair<String, Pair<String, Log.Type[]>>... whereClauses) // FIXME: make it generic
+            Pair<String, Pair<String, Object[]>>... whereClauses)
             throws SQLException {
 
         QueryBuilder<T, UUID> queryBuilder = generateQueryBuilderForDataTable(columns, search, whereClauses);
@@ -119,7 +118,7 @@ public abstract class AbstractCrudRepository<T> {
     public final long countForDataTable(
             List<DataTableRequestDTO.Column> columns,
             String search,
-            Pair<String, Pair<String, Log.Type[]>>... whereClauses)
+            Pair<String, Pair<String, Object[]>>... whereClauses)
             throws SQLException {
         QueryBuilder<T, UUID> queryBuilder = generateQueryBuilderForDataTable(columns, search, whereClauses);
 
@@ -133,7 +132,7 @@ public abstract class AbstractCrudRepository<T> {
     private QueryBuilder<T, UUID> generateQueryBuilderForDataTable(
             @NotNull List<DataTableRequestDTO.Column> columns,
             String search,
-            Pair<String, Pair<String, Log.Type[]>>... whereClauses)
+            Pair<String, Pair<String, Object[]>>... whereClauses)
             throws SQLException {
         QueryBuilder<T, UUID> queryBuilder = getDao().queryBuilder();
 
@@ -154,19 +153,19 @@ public abstract class AbstractCrudRepository<T> {
 
         // add other where clauses
         count = 0;
-        for (Pair<String, Pair<String, Log.Type[]>> whereClause : whereClauses) {
+        for (Pair<String, Pair<String, Object[]>> whereClause : whereClauses) {
             String columnName = whereClause.getValue().getKey();
-            Log.Type[] values = whereClause.getValue().getValue(); // FIXME: Use SelectArg
+            Object[] values = whereClause.getValue().getValue();
 
             if (getDao().getTableInfo().hasColumnName(columnName)) {
                 String operator = whereClause.getKey();
                 switch (operator) {
                     case "in":
-                        where.and().in(columnName, (Object[]) values);
+                        where.and().in(columnName, values);
                         count++;
                         break;
                     case "not_in":
-                        where.and().notIn(columnName, (Object[]) values);
+                        where.and().notIn(columnName, values);
                         count++;
                         break;
                     default:

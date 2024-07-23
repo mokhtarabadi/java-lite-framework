@@ -17,7 +17,6 @@
     </appender>
 
     <logger name="org.example" level="${app.log-level}" />
-    <logger name="org.drinkless.tdlib" level="${app.log-level}" />
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

@@ -56,9 +56,7 @@ public class LogService implements LogContract {
         dataTableDTO.setRecordsTotal(logRepository.countByTypes(types));
         dataTableDTO.setDraw(dto.getDraw());
 
-        // TODO: 3/30/24 There is bug, first run app and go to /admin/users then catch the error
-
-        Pair<String, Pair<String, Log.Type[]>> type = Pair.of("in", Pair.of("type", types));
+        Pair<String, Pair<String, Object[]>> type = Pair.of("in", Pair.of("type", types));
 
         List<Log> searchLogs = logRepository.queryForDataTable(
                 dto.getStart(),
