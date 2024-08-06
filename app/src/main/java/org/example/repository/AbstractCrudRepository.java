@@ -30,65 +30,53 @@ public abstract class AbstractCrudRepository<T> {
     @Getter(AccessLevel.PACKAGE)
     protected Dao<T, UUID> dao;
 
-    // create
+    // Create
     public UUID create(T entity) throws SQLException {
-        try {
-            Method setCreatedAtMethod = entity.getClass().getMethod("setCreatedAt", Date.class);
-            Date currentDate = new Date();
-            setCreatedAtMethod.invoke(entity, currentDate);
-        } catch (Exception e) {
-            log.trace("failed call createdAt using reflection", e);
-        }
-
-        UUID randomUuid = UUID.randomUUID();
-        try {
-            Method setIdMethod = entity.getClass().getMethod("setId", UUID.class);
-            setIdMethod.invoke(entity, randomUuid);
-        } catch (Exception e) {
-            log.trace("failed to call setId using reflection", e);
-        }
+        setCreatedAt(entity);
+        UUID id = UUID.randomUUID();
+        setId(entity, id);
         dao.create(entity);
-        return randomUuid;
+        return id;
     }
 
-    // read
+    // Read
     public T read(UUID id) throws SQLException {
         return dao.queryForId(id);
     }
 
-    // update
+    // Update
     public int update(T entity) throws SQLException {
         return dao.update(entity);
     }
 
-    // delete
+    // Delete
     public int delete(T entity) throws SQLException {
         return dao.delete(entity);
     }
 
-    // count
+    // Count
     public long count() throws SQLException {
         return dao.countOf();
     }
 
-    // all
+    // All
     public List<T> all() throws SQLException {
         return dao.queryForAll();
     }
 
-    // batch
+    // Batch
     public <V> V batch(Callable<V> callable) throws Exception {
         return dao.callBatchTasks(callable);
     }
 
-    // delete by id
+    // Delete by ID
     public int deleteById(UUID uuid) throws SQLException {
         DeleteBuilder<T, UUID> builder = dao.deleteBuilder();
         builder.where().eq("id", uuid);
         return builder.delete();
     }
 
-    // datatables
+    // DataTables
     @SafeVarargs
     public final List<T> queryForDataTable(
             long start,
@@ -101,16 +89,11 @@ public abstract class AbstractCrudRepository<T> {
             throws SQLException {
 
         QueryBuilder<T, UUID> queryBuilder = generateQueryBuilderForDataTable(columns, search, whereClauses);
-
         String columnName = columns.get(columnIndex).getName();
-        queryBuilder.orderBy(columnName, orderDir.equalsIgnoreCase("asc"));
+        queryBuilder.orderBy(columnName, "asc".equalsIgnoreCase(orderDir));
+        queryBuilder.offset(start).limit(length);
 
-        queryBuilder.offset(start);
-        queryBuilder.limit(length);
-
-        // log the query
         log.debug("DataTable query: {}", queryBuilder.prepareStatementString());
-
         return queryBuilder.query();
     }
 
@@ -121,10 +104,7 @@ public abstract class AbstractCrudRepository<T> {
             Pair<String, Pair<String, Object[]>>... whereClauses)
             throws SQLException {
         QueryBuilder<T, UUID> queryBuilder = generateQueryBuilderForDataTable(columns, search, whereClauses);
-
-        // log the query
         log.debug("DataTable count query: {}", queryBuilder.prepareStatementString());
-
         return queryBuilder.countOf();
     }
 
@@ -134,30 +114,42 @@ public abstract class AbstractCrudRepository<T> {
             String search,
             Pair<String, Pair<String, Object[]>>... whereClauses)
             throws SQLException {
-        QueryBuilder<T, UUID> queryBuilder = getDao().queryBuilder();
-
+        QueryBuilder<T, UUID> queryBuilder = dao.queryBuilder();
         Where<T, UUID> where = queryBuilder.where();
 
+        int count = addSearchClauses(where, columns, search);
+        count += addWhereClauses(where, whereClauses);
+
+        if (count > 0) {
+            where.and(count);
+        }
+
+        return queryBuilder;
+    }
+
+    private int addSearchClauses(Where<T, UUID> where, List<DataTableRequestDTO.Column> columns, String search)
+            throws SQLException {
         int count = 0;
         for (DataTableRequestDTO.Column column : columns) {
-            if (getDao().getTableInfo().hasColumnName(column.getName()) && column.isSearchable()) {
-                where.like(column.getName(), new SelectArg("%" + search + "%"));
+            if (dao.getTableInfo().hasColumnName(column.getName()) && column.isSearchable()) {
+                where.like(column.getName(), "%" + search + "%");
                 count++;
             }
         }
-
-        // add all where clauses with or
         if (count > 0) {
             where.or(count);
         }
+        return count;
+    }
 
-        // add other where clauses
-        count = 0;
+    private int addWhereClauses(Where<T, UUID> where, Pair<String, Pair<String, Object[]>>... whereClauses)
+            throws SQLException {
+        int count = 0;
         for (Pair<String, Pair<String, Object[]>> whereClause : whereClauses) {
             String columnName = whereClause.getValue().getKey();
             Object[] values = whereClause.getValue().getValue();
 
-            if (getDao().getTableInfo().hasColumnName(columnName)) {
+            if (dao.getTableInfo().hasColumnName(columnName)) {
                 String operator = whereClause.getKey();
                 switch (operator) {
                     case "in":
@@ -173,12 +165,24 @@ public abstract class AbstractCrudRepository<T> {
                 }
             }
         }
+        return count;
+    }
 
-        // add all where clauses with and
-        if (count > 0) {
-            where.and(count);
+    private void setCreatedAt(T entity) {
+        try {
+            Method method = entity.getClass().getMethod("setCreatedAt", Date.class);
+            method.invoke(entity, new Date());
+        } catch (Exception e) {
+            log.trace("Failed to set createdAt using reflection", e);
         }
+    }
 
-        return queryBuilder;
+    private void setId(T entity, UUID id) {
+        try {
+            Method method = entity.getClass().getMethod("setId", UUID.class);
+            method.invoke(entity, id);
+        } catch (Exception e) {
+            log.trace("Failed to set ID using reflection", e);
+        }
     }
 }

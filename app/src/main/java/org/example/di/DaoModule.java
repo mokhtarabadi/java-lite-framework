@@ -87,28 +87,28 @@ public class DaoModule {
     @SneakyThrows
     @Provides
     public Dao<Invoice, UUID> provideInvoiceDao(ConnectionSource connectionSource) {
-        log.trace("Providing Application Dao");
+        log.trace("Providing Invoice Dao");
         return DaoManager.createDao(connectionSource, Invoice.class);
     }
 
     @SneakyThrows
     @Provides
     public Dao<Order, UUID> provideOrderDao(ConnectionSource connectionSource) {
-        log.trace("Providing Application Dao");
+        log.trace("Providing Order Dao");
         return DaoManager.createDao(connectionSource, Order.class);
     }
 
     @SneakyThrows
     @Provides
     public Dao<Plan, UUID> providePlanDao(ConnectionSource connectionSource) {
-        log.trace("Providing Application Dao");
+        log.trace("Providing Plan Dao");
         return DaoManager.createDao(connectionSource, Plan.class);
     }
 
     @SneakyThrows
     @Provides
     public Dao<Session, UUID> provideSessionDao(ConnectionSource connectionSource) {
-        log.trace("Providing Application Dao");
+        log.trace("Providing Session Dao");
         return DaoManager.createDao(connectionSource, Session.class);
     }
 }

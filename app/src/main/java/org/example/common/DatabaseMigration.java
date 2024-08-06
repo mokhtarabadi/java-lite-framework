@@ -10,7 +10,9 @@ package org.example.common;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import java.sql.SQLException;
+import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.sql.DataSource;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,20 +26,14 @@ public class DatabaseMigration {
 
     @NonNull private DataSource dataSource;
 
+    @Named("tables")
+    @NonNull private List<Class<?>> tables;
+
     public void migrate() throws SQLException {
         // create tables
-        TableUtils.createTableIfNotExists(connectionSource, User.class);
-        TableUtils.createTableIfNotExists(connectionSource, Role.class);
-        TableUtils.createTableIfNotExists(connectionSource, UserRole.class);
-        TableUtils.createTableIfNotExists(connectionSource, Log.class);
-        TableUtils.createTableIfNotExists(connectionSource, SystemConfig.class);
-        TableUtils.createTableIfNotExists(connectionSource, Node.class);
-        TableUtils.createTableIfNotExists(connectionSource, Client.class);
-        TableUtils.createTableIfNotExists(connectionSource, Application.class);
-        TableUtils.createTableIfNotExists(connectionSource, Invoice.class);
-        TableUtils.createTableIfNotExists(connectionSource, Order.class);
-        TableUtils.createTableIfNotExists(connectionSource, Plan.class);
-        TableUtils.createTableIfNotExists(connectionSource, Session.class);
+        for (Class<?> table : tables) {
+            TableUtils.createTableIfNotExists(connectionSource, table);
+        }
 
         // configure flyway
         Flyway flyway = Flyway.configure()

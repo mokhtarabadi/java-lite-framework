@@ -77,7 +77,6 @@ public class UserService implements UserContract, AuthContract {
         }
 
         if (!BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
-            // log
             // TODO: 12/30/23 need to user transaction or not?
 
             logService.makeLog(Log.Type.INVALID_LOGIN, Pair.of("username", dto.getUsername()));

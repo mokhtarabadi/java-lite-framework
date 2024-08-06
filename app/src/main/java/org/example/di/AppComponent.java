@@ -16,6 +16,7 @@ import org.example.util.Utility;
 @Component(
         modules = {
             AppModule.class,
+            ComponentModule.class,
             DaoModule.class,
             CacheModule.class,
         })

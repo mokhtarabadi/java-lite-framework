@@ -10,33 +10,23 @@ package org.example.common;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.inject.Named;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.example.annoation.*;
-import org.example.annoation.Endpoint;
-import org.example.annoation.authorization.AnonymousAllowed;
-import org.example.annoation.authorization.DenyAll;
-import org.example.annoation.authorization.PermitAll;
-import org.example.annoation.authorization.RolesAllowed;
+import org.example.annoation.authorization.*;
 import org.example.config.AppConfig;
 import org.example.controller.*;
 import org.example.dto.ResultDTO;
 import org.example.entity.User;
-import org.example.exception.AccessDenied;
-import org.example.exception.AccountDisabled;
-import org.example.exception.LoginRequired;
+import org.example.exception.*;
 import org.example.filter.AuthenticationFilter;
-import org.example.filter.authorization.AnonymousAllowedFilter;
-import org.example.filter.authorization.DenyAllFilter;
-import org.example.filter.authorization.PermitAllFilter;
-import org.example.filter.authorization.RolesAllowedFilter;
+import org.example.filter.authorization.*;
 import org.example.service.UserService;
 import spark.*;
 
@@ -44,7 +34,6 @@ import spark.*;
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 public class Router {
 
-    // things needed for rendering
     @NonNull private GsonResponseTransformer gsonResponseTransformer;
 
     @NonNull private TemplateEngine templateEngine;
@@ -55,58 +44,29 @@ public class Router {
 
     @NonNull private AppConfig appConfig;
 
-    // needed services
     @NonNull private UserService userService;
 
-    // authentication filter
     @NonNull private AuthenticationFilter authenticationFilter;
 
-    // Authorization filters
     @NonNull private AnonymousAllowedFilter anonymousAllowedFilter;
 
     @NonNull private DenyAllFilter denyAllFilter;
 
     @NonNull private PermitAllFilter permitAllFilter;
 
-    // controllers
-    @NonNull private AuthController authController;
-
-    @NonNull private UserController userController;
-
-    @NonNull private AdminController adminController;
-
-    @NonNull private DashboardController dashboardController;
-
-    @NonNull private CustomerController customerController;
-
-    @NonNull private ProviderController providerController;
-
-    private Map<Class<?>, Object> getControllers() {
-        return Arrays.stream(new Object[] {
-                    authController,
-                    userController,
-                    adminController,
-                    dashboardController,
-                    customerController,
-                    providerController
-                })
-                .collect(Collectors.toMap(Object::getClass, o -> o));
-    }
+    @NonNull @Named("controllers")
+    private Map<Class<?>, Object> controllers;
 
     @Getter
     public enum Error {
         @SerializedName("resource_not_found")
         RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND_404, "error.resource_not_found"),
-
         @SerializedName("internal_server_error")
         INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR_500, "error.internal_server_error"),
-
         @SerializedName("access_denied")
         ACCESS_DENIED(HttpStatus.FORBIDDEN_403, "error.access_denied"),
-
         @SerializedName("account_disabled")
         ACCOUNT_DISABLED(HttpStatus.FORBIDDEN_403, "error.account_disabled"),
-
         @SerializedName("login_required")
         LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED_401, "error.login_required");
 
@@ -122,238 +82,206 @@ public class Router {
 
     public void registerRoutes() {
         List<RouteModel> routeModels = new ArrayList<>();
-        Map<Class<?>, Object> controllers = getControllers();
+        for (Map.Entry<Class<?>, Object> entry : controllers.entrySet()) {
+            Class<?> controllerClass = entry.getKey();
+            Object controllerInstance = entry.getValue();
+            routeModels.addAll(createRouteModels(controllerClass, controllerInstance));
+        }
 
-        for (Class<?> controllerClass : controllers.keySet()) {
-            // handle roles
-            List<Filter> authorizationFilters = new ArrayList<>();
-            if (controllerClass.isAnnotationPresent(DenyAll.class)) {
-                authorizationFilters.add(denyAllFilter);
-            } else if (controllerClass.isAnnotationPresent(PermitAll.class)) {
-                authorizationFilters.add(permitAllFilter);
-            } else if (controllerClass.isAnnotationPresent(AnonymousAllowed.class)) {
-                authorizationFilters.add(anonymousAllowedFilter);
-            } else if (controllerClass.isAnnotationPresent(RolesAllowed.class)) {
-                RolesAllowed rolesAllowed = controllerClass.getAnnotation(RolesAllowed.class);
-                RolesAllowedFilter rolesAllowedFilter =
-                        new RolesAllowedFilter(userService, Arrays.asList(rolesAllowed.value()));
-                authorizationFilters.add(rolesAllowedFilter);
-            }
+        Spark.before(((request, response) -> request.session(true)));
 
-            Object controllerInstance = controllers.get(controllerClass);
-            for (java.lang.reflect.Method declaredMethod : controllerClass.getDeclaredMethods()) {
-                String path;
-                HTTPMethod HTTPMethod;
-                boolean needAuth;
-                boolean isRest;
+        routeModels.forEach(this::configureRoute);
 
-                if (declaredMethod.isAnnotationPresent(Endpoint.class)) {
-                    Endpoint routeModel = declaredMethod.getAnnotation(Endpoint.class);
-                    path = routeModel.path();
-                    HTTPMethod = routeModel.method();
-                    needAuth = routeModel.authentication();
-                    isRest = false;
-                } else if (declaredMethod.isAnnotationPresent(APIEndpoint.class)) {
-                    APIEndpoint route = declaredMethod.getAnnotation(APIEndpoint.class);
-                    path = route.path();
-                    HTTPMethod = route.method();
-                    needAuth = route.authentication();
-                    isRest = true;
-                } else continue; // not a route
+        handleExceptions();
 
-                if (declaredMethod.isAnnotationPresent(DenyAll.class)) {
-                    authorizationFilters.add(denyAllFilter);
-                } else if (declaredMethod.isAnnotationPresent(PermitAll.class)) {
-                    authorizationFilters.add(permitAllFilter);
-                } else if (declaredMethod.isAnnotationPresent(AnonymousAllowed.class)) {
-                    authorizationFilters.add(anonymousAllowedFilter);
-                } else if (declaredMethod.isAnnotationPresent(RolesAllowed.class)) {
-                    RolesAllowed rolesAllowed = declaredMethod.getAnnotation(RolesAllowed.class);
-                    RolesAllowedFilter rolesAllowedFilter =
-                            new RolesAllowedFilter(userService, Arrays.asList(rolesAllowed.value()));
-                    authorizationFilters.add(rolesAllowedFilter);
-                }
+        Spark.notFound(this::handleNotFound);
+        Spark.internalServerError(this::handleInternalServerError);
+    }
 
-                RouteModel finalRouteModel = new RouteModel(path, HTTPMethod) {
-                    @Override
-                    public ModelAndView handle(Request request, Response response)
-                            throws SQLException, InvocationTargetException, IllegalAccessException {
-                        ModelAndView modelAndView =
-                                (ModelAndView) declaredMethod.invoke(controllerInstance, request, response);
-                        Map<String, Object> model = (Map<String, Object>) modelAndView.getModel();
+    private List<RouteModel> createRouteModels(Class<?> controllerClass, Object controllerInstance) {
+        List<RouteModel> routeModels = new ArrayList<>();
+        List<Filter> authorizationFilters = getAuthorizationFilters(controllerClass);
 
-                        if (request.attributes().contains("userId")) {
-                            UUID id = request.attribute("userId");
-                            User user = userService.getUser(id);
-                            model.put("user", user);
-                        }
-
-                        // put lang
-                        String lang = request.cookie("lang");
-                        if (lang == null) {
-                            lang = appConfig.getDefaultLocale();
-                        }
-                        model.put("lang", lang);
-
-                        return modelAndView;
-                    }
-
-                    @Override
-                    public <T> ResultDTO<T> handleAPI(Request request, Response response)
-                            throws SQLException, LoginRequired, InvocationTargetException, IllegalAccessException {
-                        return (ResultDTO<T>) declaredMethod.invoke(controllerInstance, request, response);
-                    }
-                };
-                finalRouteModel.setRequireAuthentication(needAuth);
-                finalRouteModel.setAPI(isRest);
-                finalRouteModel.setRoleFilters(authorizationFilters);
-
-                routeModels.add(finalRouteModel);
+        for (java.lang.reflect.Method method : controllerClass.getDeclaredMethods()) {
+            RouteModel routeModel = createRouteModel(method, controllerInstance, authorizationFilters);
+            if (routeModel != null) {
+                routeModels.add(routeModel);
             }
         }
 
-        // start session
-        Spark.before(((request, response) -> request.session(true)));
+        return routeModels;
+    }
 
-        routeModels.forEach(routeModel -> Spark.path(routeModel.getPath(), () -> {
-            // TODO: 12/30/23 check if need write a filter to trim params and queryParams
+    private RouteModel createRouteModel(
+            java.lang.reflect.Method method, Object controllerInstance, List<Filter> authorizationFilters) {
+        String path;
+        HTTPMethod httpMethod;
+        boolean needAuth;
+        boolean isRest;
 
-            // handle authentication
+        if (method.isAnnotationPresent(Endpoint.class)) {
+            Endpoint endpoint = method.getAnnotation(Endpoint.class);
+            path = endpoint.path();
+            httpMethod = endpoint.method();
+            needAuth = endpoint.authentication();
+            isRest = false;
+        } else if (method.isAnnotationPresent(APIEndpoint.class)) {
+            APIEndpoint apiEndpoint = method.getAnnotation(APIEndpoint.class);
+            path = apiEndpoint.path();
+            httpMethod = apiEndpoint.method();
+            needAuth = apiEndpoint.authentication();
+            isRest = true;
+        } else {
+            return null;
+        }
+
+        authorizationFilters.addAll(getAuthorizationFilters(method));
+
+        return new RouteModel(path, httpMethod) {
+            @Override
+            public ModelAndView handle(Request request, Response response) throws Exception {
+                ModelAndView modelAndView = (ModelAndView) method.invoke(controllerInstance, request, response);
+                Map<String, Object> model = (Map<String, Object>) modelAndView.getModel();
+                addUserAndLocaleToModel(request, model);
+                return modelAndView;
+            }
+
+            @Override
+            public <T> ResultDTO<T> handleAPI(Request request, Response response) throws Exception {
+                return (ResultDTO<T>) method.invoke(controllerInstance, request, response);
+            }
+        }.setRequireAuthentication(needAuth).setAPI(isRest).setRoleFilters(authorizationFilters);
+    }
+
+    private void addUserAndLocaleToModel(Request request, Map<String, Object> model) throws SQLException {
+        if (request.attributes().contains("userId")) {
+            UUID id = request.attribute("userId");
+            User user = userService.getUser(id);
+            model.put("user", user);
+        }
+        String lang = request.cookie("lang");
+        if (lang == null) {
+            lang = appConfig.getDefaultLocale();
+        }
+        model.put("lang", lang);
+    }
+
+    private List<Filter> getAuthorizationFilters(java.lang.reflect.AnnotatedElement element) {
+        List<Filter> filters = new ArrayList<>();
+        if (element.isAnnotationPresent(DenyAll.class)) {
+            filters.add(denyAllFilter);
+        } else if (element.isAnnotationPresent(PermitAll.class)) {
+            filters.add(permitAllFilter);
+        } else if (element.isAnnotationPresent(AnonymousAllowed.class)) {
+            filters.add(anonymousAllowedFilter);
+        } else if (element.isAnnotationPresent(RolesAllowed.class)) {
+            RolesAllowed rolesAllowed = element.getAnnotation(RolesAllowed.class);
+            filters.add(new RolesAllowedFilter(userService, Arrays.asList(rolesAllowed.value())));
+        }
+        return filters;
+    }
+
+    private void configureRoute(RouteModel routeModel) {
+        Spark.path(routeModel.getPath(), () -> {
             if (routeModel.isRequireAuthentication()) {
                 log.trace("Require authentication: {}", routeModel.getPath());
                 Spark.before("", authenticationFilter);
             }
 
-            // add default denyAll if no one defined
             if (routeModel.getRoleFilters().isEmpty()) {
                 routeModel.getRoleFilters().add(denyAllFilter);
             }
 
-            // handle authorization
-            for (Filter roleFilter : routeModel.getRoleFilters()) {
+            routeModel.getRoleFilters().forEach(filter -> {
                 log.trace(
                         "Add authorization {} filter to {} path",
-                        roleFilter.getClass().getSimpleName(),
+                        filter.getClass().getSimpleName(),
                         routeModel.getPath());
-                Spark.before("", roleFilter);
-            }
+                Spark.before("", filter);
+            });
 
-            // handle requests
             if (routeModel.isAPI()) {
                 handleAPIRoutes(routeModel);
             } else {
                 handleRoutes(routeModel);
             }
 
-            if (routeModel.isAPI()) {
-                Spark.after("", (request, response) -> response.type("application/json"));
-            } else {
-                Spark.after("", (request, response) -> response.type("text/html"));
-            }
-        }));
-
-        handleExceptions();
-
-        // error 404
-        Spark.notFound((request, response) -> {
-            log.debug("not found: {}", request.pathInfo());
-
-            Error error = Error.RESOURCE_NOT_FOUND;
-            error.locale = request.cookie("lang");
-            if (isRequestJson(request)) {
-                response.type("application/json");
-                return generateJsonError(error);
-            } else {
-                return serveError(error);
-            }
-        });
-
-        // error 500
-        Spark.internalServerError((request, response) -> {
-            Error error = Error.INTERNAL_SERVER_ERROR;
-            error.locale = request.cookie("lang");
-            if (isRequestJson(request)) {
-                response.type("application/json");
-                return generateJsonError(error);
-            } else {
-                return serveError(error);
-            }
+            Spark.after(
+                    "", (request, response) -> response.type(routeModel.isAPI() ? "application/json" : "text/html"));
         });
     }
 
     private void handleExceptions() {
-        // login required 401
-        Spark.exception(LoginRequired.class, (exception, request, response) -> {
-            log.debug("wow! authentication needed");
+        Spark.exception(LoginRequired.class, this::handleLoginRequired);
+        Spark.exception(AccessDenied.class, this::handleAccessDenied);
+        Spark.exception(AccountDisabled.class, this::handleAccountDisabled);
+        Spark.exception(SQLException.class, this::handleSQLException);
+        Spark.exception(JsonParseException.class, this::handleJsonParseException);
+    }
 
-            Error error = Error.LOGIN_REQUIRED;
-            error.locale = request.cookie("lang");
-            if (isRequestJson(request)) {
-                response.type("application/json");
-                response.status(error.getHttpCode());
-                response.body(generateJsonError(error));
-            } else {
-                response.redirect("/login?relogin=true");
-            }
-        });
+    private void handleLoginRequired(Exception exception, Request request, Response response) {
+        log.debug("wow! authentication needed");
+        handleError(
+                response, Error.LOGIN_REQUIRED, request.cookie("lang"), isRequestJson(request), "/login?relogin=true");
+    }
 
-        // access denied 403
-        Spark.exception(AccessDenied.class, (exception, request, response) -> {
-            log.debug("you are not welcome here.");
+    private void handleAccessDenied(Exception exception, Request request, Response response) {
+        log.debug("you are not welcome here.");
+        handleError(response, Error.ACCESS_DENIED, request.cookie("lang"), isRequestJson(request), null);
+    }
 
-            Error error = Error.ACCESS_DENIED;
-            error.locale = request.cookie("lang");
-            response.status(error.getHttpCode());
-            if (isRequestJson(request)) {
-                response.type("application/json");
-                response.body(generateJsonError(error));
-            } else {
-                response.body(serveError(error));
-            }
-        });
+    private void handleAccountDisabled(Exception exception, Request request, Response response) {
+        log.debug("your account is disabled.");
+        handleError(response, Error.ACCOUNT_DISABLED, request.cookie("lang"), isRequestJson(request), null);
+    }
 
-        // account disabled 403
-        Spark.exception(AccountDisabled.class, (exception, request, response) -> {
-            log.debug("your account is disabled.");
+    private void handleSQLException(Exception exception, Request request, Response response) {
+        log.error("sql exception", exception);
+        handleError(response, Error.INTERNAL_SERVER_ERROR, request.cookie("lang"), isRequestJson(request), null);
+    }
 
-            Error error = Error.ACCOUNT_DISABLED;
-            error.locale = request.cookie("lang");
-            response.status(error.getHttpCode());
-            if (isRequestJson(request)) {
-                response.type("application/json");
-                response.body(generateJsonError(error));
-            } else {
-                response.body(serveError(error));
-            }
-        });
+    private void handleJsonParseException(Exception exception, Request request, Response response) {
+        log.error("json parse exception", exception);
+        if (isRequestJson(request)) {
+            response.status(HttpStatus.BAD_REQUEST_400);
+            response.body(gson.toJson(AbstractController.failure(
+                    Collections.singletonList("payload is not valid json: " + exception.getMessage()))));
+        } else {
+            log.debug("must never be here! if it is, it's a bug :D");
+        }
+    }
 
-        // sql exception
-        Spark.exception(SQLException.class, (exception, request, response) -> {
-            log.error("sql exception", exception);
+    private void handleError(Response response, Error error, String locale, boolean isJson, String redirectUrl) {
+        error.locale = locale;
+        response.status(error.getHttpCode());
+        if (isJson) {
+            response.type("application/json");
+            response.body(generateJsonError(error));
+        } else if (redirectUrl != null) {
+            response.redirect(redirectUrl);
+        } else {
+            response.body(serveError(error));
+        }
+    }
 
-            Error error = Error.INTERNAL_SERVER_ERROR;
-            error.locale = request.cookie("lang");
-            response.status(error.getHttpCode());
-            if (isRequestJson(request)) {
-                response.type("application/json");
-                response.body(generateJsonError(error));
-            } else {
-                response.body(serveError(error));
-            }
-        });
+    private String handleNotFound(Request request, Response response) {
+        log.debug("not found: {}", request.pathInfo());
+        return handleErrorResponse(response, Error.RESOURCE_NOT_FOUND, request.cookie("lang"), isRequestJson(request));
+    }
 
-        // can't parse json
-        Spark.exception(JsonParseException.class, (exception, request, response) -> {
-            log.error("json parse exception", exception);
+    private String handleInternalServerError(Request request, Response response) {
+        return handleErrorResponse(
+                response, Error.INTERNAL_SERVER_ERROR, request.cookie("lang"), isRequestJson(request));
+    }
 
-            if (isRequestJson(request)) {
-                response.status(HttpStatus.BAD_REQUEST_400);
-                response.body(gson.toJson(AbstractController.failure(
-                        Collections.singletonList("payload is not valid json: " + exception.getMessage()))));
-            } else {
-                log.debug("must never be here! if it is, it's a bug :D");
-            }
-        });
+    private String handleErrorResponse(Response response, Error error, String locale, boolean isJson) {
+        error.locale = locale;
+        if (isJson) {
+            response.type("application/json");
+            return generateJsonError(error);
+        } else {
+            return serveError(error);
+        }
     }
 
     private boolean isRequestJson(Request request) {
@@ -424,7 +352,6 @@ public class Router {
 
     @Data
     private abstract static class RouteModel {
-
         @NonNull private String path;
 
         @NonNull private HTTPMethod method;
@@ -433,10 +360,23 @@ public class Router {
         private List<Filter> roleFilters;
         private boolean isAPI;
 
-        public abstract ModelAndView handle(Request request, Response response)
-                throws SQLException, InvocationTargetException, IllegalAccessException;
+        public abstract ModelAndView handle(Request request, Response response) throws Exception;
 
-        public abstract <T> ResultDTO<T> handleAPI(Request request, Response response)
-                throws SQLException, LoginRequired, InvocationTargetException, IllegalAccessException;
+        public abstract <T> ResultDTO<T> handleAPI(Request request, Response response) throws Exception;
+
+        public RouteModel setRequireAuthentication(boolean requireAuthentication) {
+            this.requireAuthentication = requireAuthentication;
+            return this;
+        }
+
+        public RouteModel setRoleFilters(List<Filter> roleFilters) {
+            this.roleFilters = roleFilters;
+            return this;
+        }
+
+        public RouteModel setAPI(boolean isAPI) {
+            this.isAPI = isAPI;
+            return this;
+        }
     }
 }

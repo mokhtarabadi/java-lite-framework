@@ -19,6 +19,7 @@ import org.example.common.DatabaseMigration;
 import org.example.common.Localization;
 import org.example.common.Router;
 import org.example.config.AppConfig;
+import org.example.controller.*;
 import org.example.di.AppComponent;
 import org.example.di.DaggerAppComponent;
 import org.example.util.Utility;
@@ -35,6 +36,18 @@ public class App {
     @NonNull private Router router;
 
     @NonNull private Localization localization;
+
+    @NonNull private AdminController adminController;
+
+    @NonNull private AuthController authController;
+
+    @NonNull private CustomerController customerController;
+
+    @NonNull private DashboardController dashboardController;
+
+    @NonNull private ProviderController providerController;
+
+    @NonNull private UserController userController;
 
     private void startServer() {
         // migrate database

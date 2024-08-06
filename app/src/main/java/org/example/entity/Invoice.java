@@ -18,7 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.example.common.MapPersister;
+import org.example.common.JsonMapType;
 
 @Data
 @NoArgsConstructor
@@ -29,7 +29,7 @@ public class Invoice implements Serializable {
     @DatabaseField(id = true, canBeNull = false)
     private UUID id;
 
-    @NonNull @DatabaseField(persisterClass = MapPersister.class)
+    @NonNull @DatabaseField(persisterClass = JsonMapType.class)
     private Map<String, Object> data; // <key, value>
 
     @DatabaseField(columnName = "created_at", dataType = DataType.DATE_LONG)

@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import lombok.*;
-import org.example.common.MapPersister;
+import org.example.common.JsonMapType;
 
 @Data
 @NoArgsConstructor
@@ -66,7 +66,7 @@ public class Log implements Serializable {
     @NonNull @DatabaseField(dataType = DataType.ENUM_TO_STRING, canBeNull = false, index = true)
     private Type type;
 
-    @NonNull @DatabaseField(canBeNull = false, persisterClass = MapPersister.class)
+    @NonNull @DatabaseField(canBeNull = false, persisterClass = JsonMapType.class)
     private Map<String, Object> data;
 
     @DatabaseField(columnName = "created_at", dataType = DataType.DATE_LONG)
