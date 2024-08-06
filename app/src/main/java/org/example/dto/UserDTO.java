@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.validation.constraints.*;
-import lombok.*;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
@@ -24,8 +24,8 @@ public class UserDTO {
     @Size(min = 3, max = 255, message = "{signup.username.size}")
     private String username;
 
-    @Email(message = "{email.notValid}")
     @Size(max = 255, message = "{signup.email.size}")
+    @Email(message = "{email.notValid}")
     private String email;
 
     @NotEmpty(message = "{signup.firstName.empty}")
@@ -37,6 +37,14 @@ public class UserDTO {
     @SerializedName("last_name")
     private String lastName;
 
+    @Size(max = 30, message = "{admin.users.newPassword.size}")
+    @SerializedName("new_password")
+    private String newPassword;
+
+    @Size(max = 30, message = "{admin.users.confirmNewPassword.size}")
+    @SerializedName("confirm_new_password")
+    private String confirmNewPassword;
+
     @NotBlank(message = "{signup.password.empty}")
     @Size(min = 8, max = 30, message = "{signup.password.size}")
     private String password;
@@ -46,21 +54,32 @@ public class UserDTO {
     @SerializedName("confirm_password")
     private String confirmPassword;
 
+    @SerializedName("class")
+    @Min(value = 0, message = "{clazz.min}")
+    private int clazz;
+
     // custom validator
+    @AssertTrue(message = "{admin.users.confirmNewPassword.empty}")
+    private boolean isNeedConfirmPassword() {
+        return StringUtils.isEmpty(newPassword) || StringUtils.isNotEmpty(confirmNewPassword);
+    }
+
     @AssertTrue(message = "{signup.passwordsDoNotMatch}")
     private boolean isPasswordsMatch() {
+        return StringUtils.isEmpty(newPassword) || StringUtils.equals(newPassword, confirmNewPassword);
+    }
+
+    @AssertTrue(message = "{signup.passwordsDoNotMatch}")
+    private boolean isInitialPasswordsMatch() {
         return StringUtils.isEmpty(password) || StringUtils.equals(password, confirmPassword);
     }
 
     // below not need when validation
-    @SerializedName("is_active")
-    private boolean isActive;
-
-    @Null
+    @NotEmpty(message = "{admin.users.roles.empty}")
     private List<String> roles;
 
-    @SerializedName("class")
-    private int clazz;
+    @SerializedName("is_active")
+    private boolean isActive;
 
     @Null
     @SerializedName("created_at")

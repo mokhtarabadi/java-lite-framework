@@ -37,18 +37,6 @@ public class App {
 
     @NonNull private Localization localization;
 
-    @NonNull private AdminController adminController;
-
-    @NonNull private AuthController authController;
-
-    @NonNull private CustomerController customerController;
-
-    @NonNull private DashboardController dashboardController;
-
-    @NonNull private ProviderController providerController;
-
-    @NonNull private UserController userController;
-
     private void startServer() {
         // migrate database
         try {

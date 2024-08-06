@@ -7,7 +7,6 @@
  */
 package org.example.mapper;
 
-import org.example.dto.UpdateUserDTO;
 import org.example.dto.UserDTO;
 import org.example.entity.User;
 import org.mapstruct.Mapper;
@@ -27,6 +26,8 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", expression = "java(new java.util.Date())")
     User mapFromDTO(UserDTO dto);
 
+    @Mapping(target = "newPassword", ignore = true)
+    @Mapping(target = "confirmNewPassword", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "confirmPassword", ignore = true)
     @Mapping(
@@ -40,5 +41,5 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "updatedAt", expression = "java(new java.util.Date())")
-    void updateFromDTO(@MappingTarget User entity, UpdateUserDTO dto);
+    void updateFromDTO(@MappingTarget User entity, UserDTO dto);
 }

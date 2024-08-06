@@ -46,13 +46,13 @@ public class ProviderService implements NodeContract {
     };
 
     @Override
-    public NodeState addNewNode(NodeDto nodeDto) throws SQLException {
+    public NodeState create(NodeDto nodeDto) throws SQLException {
         return null;
     }
 
     @Override
-    public NodeState updateNode(UUID uuid, NodeDto nodeDto) throws SQLException {
-        Node oldNode = getNode(uuid);
+    public NodeState update(UUID uuid, NodeDto nodeDto) throws SQLException {
+        Node oldNode = get(uuid);
 
         return TransactionManager.callInTransaction(connectionSource, () -> {
             // check address exists
@@ -69,17 +69,17 @@ public class ProviderService implements NodeContract {
     }
 
     @Override
-    public Node getNode(UUID uuid) throws SQLException {
+    public Node get(UUID uuid) throws SQLException {
         return nodeCache.get(uuid, nodeCacheLoader);
     }
 
     @Override
-    public NodeState deleteNode(UUID uuid) throws SQLException {
+    public NodeState delete(UUID uuid) throws SQLException {
         return null;
     }
 
     @Override
-    public DataTableDTO<NodeDto> fetchNodesForDataTable(DataTableRequestDTO dto) throws SQLException {
+    public DataTableDTO<Node> fetchForDataTable(DataTableRequestDTO dto) throws SQLException {
         return null;
     }
 }

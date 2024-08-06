@@ -94,7 +94,7 @@ public class UserService implements UserContract, AuthContract {
 
     @Override
     public void assignRoleToUser(UUID uuid, AuthorizationRole role) throws SQLException {
-        User user = getUser(uuid);
+        User user = get(uuid);
 
         if (user.getUserRoles().stream()
                 .anyMatch(userRole -> userRole.getRole().getName().equals(role.getRole()))) {
@@ -118,7 +118,7 @@ public class UserService implements UserContract, AuthContract {
 
     @Override
     public void revokeRoleFromUser(UUID uuid, AuthorizationRole role) throws SQLException {
-        User user = getUser(uuid);
+        User user = get(uuid);
 
         Optional<UserRole> userRole1 = user.getUserRoles().stream()
                 .filter(userRole -> userRole.getRole().getName().equals(role.getRole()))
@@ -138,7 +138,7 @@ public class UserService implements UserContract, AuthContract {
 
     @Override
     public boolean doesUserHaveRole(UUID uuid, AuthorizationRole role) throws SQLException {
-        User user = getUser(uuid);
+        User user = get(uuid);
         if (user == null) {
             return false;
         }
@@ -148,7 +148,7 @@ public class UserService implements UserContract, AuthContract {
     }
 
     @Override
-    public DataTableDTO<UserDTO> fetchUsersForDataTable(DataTableRequestDTO dto) throws SQLException {
+    public DataTableDTO<UserDTO> fetchForDataTable(DataTableRequestDTO dto) throws SQLException {
         DataTableDTO<UserDTO> dataTableDTO = new DataTableDTO<>();
         dataTableDTO.setRecordsTotal(userRepository.count());
 
@@ -171,7 +171,7 @@ public class UserService implements UserContract, AuthContract {
     }
 
     @Override
-    public UserState deleteUser(UUID uuid) throws SQLException {
+    public UserState delete(UUID uuid) throws SQLException {
         return TransactionManager.callInTransaction(connectionSource, () -> {
             userRoleRepository.deleteByUserId(uuid);
             userRepository.deleteById(uuid);
@@ -182,8 +182,8 @@ public class UserService implements UserContract, AuthContract {
     }
 
     @Override
-    public UserState updateUser(UUID uuid, UpdateUserDTO dto) throws SQLException {
-        User user = getUser(uuid);
+    public UserState update(UUID uuid, UserDTO dto) throws SQLException {
+        User user = get(uuid);
 
         List<AuthorizationRole> existingRoles = user.getUserRoles().stream()
                 .map(userRole -> AuthorizationRole.from(userRole.getRole().getName()))
@@ -245,7 +245,7 @@ public class UserService implements UserContract, AuthContract {
     }
 
     @Override
-    public UserState addNewUser(UserDTO dto) throws SQLException {
+    public UserState create(UserDTO dto) throws SQLException {
         User user = UserMapper.INSTANCE.mapFromDTO(dto);
 
         return TransactionManager.callInTransaction(connectionSource, () -> {
@@ -284,7 +284,7 @@ public class UserService implements UserContract, AuthContract {
     }
 
     @Override
-    public User getUser(UUID uuid) throws SQLException {
+    public User get(UUID uuid) throws SQLException {
         return userCache.get(uuid, userCacheLoader);
     }
 }
