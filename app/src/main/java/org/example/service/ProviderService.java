@@ -79,7 +79,7 @@ public class ProviderService implements NodeContract {
     }
 
     @Override
-    public DataTableDTO<Node> fetchForDataTable(DataTableRequestDTO dto) throws SQLException {
+    public DataTableDTO<NodeDto> fetchForDataTable(DataTableRequestDTO dto) throws SQLException {
         return null;
     }
 }

@@ -156,7 +156,7 @@ public class Router {
     private void addUserAndLocaleToModel(Request request, Map<String, Object> model) throws SQLException {
         if (request.attributes().contains("userId")) {
             UUID id = request.attribute("userId");
-            User user = userService.getUser(id);
+            User user = userService.get(id);
             model.put("user", user);
         }
         String lang = request.cookie("lang");

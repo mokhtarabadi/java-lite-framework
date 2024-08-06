@@ -57,7 +57,7 @@ public class AdminController extends AbstractController {
         // log.debug("get users body: {}", request.body());
 
         DataTableRequestDTO dataTableRequestDTO = gson.fromJson(request.body(), DataTableRequestDTO.class);
-        DataTableDTO<UserDTO> dataTableDTO = userService.fetchUsersForDataTable(dataTableRequestDTO);
+        DataTableDTO<UserDTO> dataTableDTO = userService.fetchForDataTable(dataTableRequestDTO);
 
         return success(dataTableDTO);
     }
@@ -67,7 +67,7 @@ public class AdminController extends AbstractController {
         JsonObject map = gson.fromJson(request.body(), JsonObject.class);
         UUID id = UUID.fromString(map.get("id").getAsString());
 
-        UserState userState = userService.deleteUser(id);
+        UserState userState = userService.delete(id);
         if (userState.getState() == UserState.State.SUCCESS) {
             return success();
         }
@@ -77,7 +77,7 @@ public class AdminController extends AbstractController {
     @APIEndpoint(method = HTTPMethod.PUT, path = "/api/v1/admin/users/:id")
     public ResultDTO<UUID> editUserById(Request request, Response response) throws SQLException {
         UUID id = UUID.fromString(request.params(":id"));
-        UpdateUserDTO updateUserDTO = gson.fromJson(request.body(), UpdateUserDTO.class);
+        UserDTO updateUserDTO = gson.fromJson(request.body(), UserDTO.class);
 
         // validate
         List<String> errors = validator.validate(request, updateUserDTO);
@@ -85,7 +85,7 @@ public class AdminController extends AbstractController {
             return failure(errors);
         }
 
-        UserState userState = userService.updateUser(id, updateUserDTO);
+        UserState userState = userService.update(id, updateUserDTO);
         switch (userState.getState()) {
             case EMAIL_TAKEN:
                 return failure(getLocalization().getString(request, "signup.email.taken"));

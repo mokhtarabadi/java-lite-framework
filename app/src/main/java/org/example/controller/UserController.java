@@ -43,7 +43,7 @@ public class UserController extends AbstractController {
     @APIEndpoint(method = HTTPMethod.GET, path = "/api/v1/me")
     public ResultDTO<UserDTO> getMe(Request request, Response response) throws SQLException {
         UUID userId = request.attribute("userId");
-        User user = userService.getUser(userId);
+        User user = userService.get(userId);
 
         UserDTO userDTO = UserMapper.INSTANCE.mapFromEntity(user);
         return success(userDTO);

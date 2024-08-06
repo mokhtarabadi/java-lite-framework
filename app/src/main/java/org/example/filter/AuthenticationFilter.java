@@ -65,7 +65,7 @@ public class AuthenticationFilter implements Filter {
         }
 
         // check user exists in the database and user is active
-        User user = userService.getUser(UUID.fromString(userId));
+        User user = userService.get(UUID.fromString(userId));
         if (user == null) {
             throw new LoginRequired();
         }

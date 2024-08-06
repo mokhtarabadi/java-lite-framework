@@ -21,12 +21,16 @@ public interface NodeMapper {
 
     NodeDto mapFromEntity(org.example.entity.Node node);
 
+    @Mapping(target = "flagDelete", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "updatedAt", expression = "java(new java.util.Date())")
     @Mapping(target = "provider", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     Node mapFromDto(NodeDto dto);
 
+    @Mapping(target = "flagDelete", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "updatedAt", expression = "java(new java.util.Date())")
     @Mapping(target = "provider", ignore = true)
     @Mapping(target = "id", ignore = true)

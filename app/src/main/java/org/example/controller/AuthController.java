@@ -59,7 +59,7 @@ public class AuthController extends AbstractController {
             return failure(errors);
         }
 
-        UserState userState = userService.addNewUser(userDTO);
+        UserState userState = userService.create(userDTO);
         switch (userState.getState()) {
             case EMAIL_TAKEN:
                 return failure(getLocalization().getString(request, "signup.email.taken"));

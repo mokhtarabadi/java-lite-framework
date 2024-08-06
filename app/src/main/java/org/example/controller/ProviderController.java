@@ -54,7 +54,7 @@ public class ProviderController extends AbstractController {
             return failure(errors);
         }
 
-        NodeState nodeState = providerService.addNewNode(nodeDto);
+        NodeState nodeState = providerService.create(nodeDto);
         switch (nodeState.getState()) {
             case SUCCESS:
                 return success(nodeState.getUuid());
@@ -77,7 +77,7 @@ public class ProviderController extends AbstractController {
             return failure(errors);
         }
 
-        NodeState nodeState = providerService.updateNode(id, nodeDto);
+        NodeState nodeState = providerService.update(id, nodeDto);
         switch (nodeState.getState()) {
             case SUCCESS:
                 return success();
